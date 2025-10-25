@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Coach Dashboard - Mobile Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .preview-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .phone-mockup {
+            position: relative;
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 10px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #F5F7FA;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .time {
+            font-weight: 600;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .app-bar {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-icon {
+            cursor: pointer;
+        }
+
+        .welcome-text {
+            flex: 1;
+        }
+
+        .welcome-text .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .welcome-text .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .notification-badge {
+            position: relative;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #2196F3;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2196F3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 16px;
+            overflow-y: auto;
+            height: calc(100% - 140px);
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .metric-card .icon-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .metric-card.blue .icon-container {
+            background: #E3F2FD;
+            color: #2196F3;
+        }
+
+        .metric-card.green .icon-container {
+            background: #E8F5E9;
+            color: #4CAF50;
+        }
+
+        .metric-card.orange .icon-container {
+            background: #FFF3E0;
+            color: #FF9800;
+        }
+
+        .metric-card.purple .icon-container {
+            background: #F3E5F5;
+            color: #9C27B0;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        .chart {
+            height: 200px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, #2196F3, #64B5F6);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .bar:hover {
+            background: linear-gradient(to top, #FF9800, #FFB74D);
+            transform: scale(1.05);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #666;
+        }
+
+        .schedule-section {
+            margin-bottom: 24px;
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .view-all {
+            color: #2196F3;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .session-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 2px solid #E3F2FD;
+        }
+
+        .time-box {
+            width: 60px;
+            height: 60px;
+            background: #E3F2FD;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #2196F3;
+        }
+
+        .time-box .time-main {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .time-box .time-period {
+            font-size: 12px;
+        }
+
+        .session-info {
+            flex: 1;
+        }
+
+        .client-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .session-duration {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-chip {
+            background: #E3F2FD;
+            color: #2196F3;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .floating-action-button {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            background: #2196F3;
+            color: white;
+            border-radius: 16px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .floating-action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(33, 150, 243, 0.4);
+        }
+
+        /* Login Screen Styles */
+        .login-screen {
+            background: linear-gradient(135deg, #E3F2FD 0%, white 50%, #E3F2FD 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            height: 100%;
+        }
+
+        .logo-container {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .logo-container .material-icons {
+            font-size: 60px;
+            color: #2196F3;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .auth-form {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-field {
+            background: #F5F7FA;
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            width: 100%;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #2196F3;
+            background: white;
+        }
+
+        .submit-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background: #1976D2;
+            transform: translateY(-1px);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            gap: 16px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: #E0E0E0;
+        }
+
+        .divider-text {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .google-button {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .google-button:hover {
+            background: #F5F7FA;
+            transform: translateY(-1px);
+        }
+
+        .google-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 24px;
+            color: #666;
+        }
+
+        .auth-toggle a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: absolute;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            padding: 20px;
+            color: white;
+        }
+
+        .sidebar-logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .sidebar-logo .material-icons {
+            color: #2196F3;
+            font-size: 30px;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            padding: 8px 0;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background: #F5F7FA;
+        }
+
+        .menu-item.active {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196F3;
+        }
+
+        .menu-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #2196F3;
+        }
+
+        .menu-item .material-icons {
+            font-size: 22px;
+        }
+
+        .menu-label {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .menu-badge {
+            background: #2196F3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .screen-label {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <!-- Login Screen -->
+        <div>
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="login-screen">
+                        <div class="logo-container">
+                            <span class="material-icons">fitness_center</span>
+                        </div>
+                        <h1 class="app-title">PT Coach Pro</h1>
+                        <p class="app-subtitle">Welcome back!</p>
+                        
+                        <div class="auth-form">
+                            <input type="email" class="input-field" placeholder="Email">
+                            <input type="password" class="input-field" placeholder="Password">
+                            <button class="submit-button">Sign In</button>
+                            
+                            <div class="divider">
+                                <div class="divider-line"></div>
+                                <span class="divider-text">OR</span>
+                                <div class="divider-line"></div>
+                            </div>
+                            
+                            <button class="google-button">
+                                <svg class="google-icon" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                Continue with Google
+                            </button>
+                            
+                            <div class="auth-toggle">
+                                Don't have an account? <a href="#">Sign Up</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="screen-label">Login Screen</p>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div>
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <!-- Status Bar -->
+                    <div class="status-bar">
+                        <span class="time">9:41</span>
+                        <div class="status-icons">
+                            <span class="material-icons" style="font-size: 16px;">signal_cellular_alt</span>
+                            <span class="material-icons" style="font-size: 16px;">wifi</span>
+                            <span class="material-icons" style="font-size: 16px;">battery_full</span>
+                        </div>
+                    </div>
+
+                    <!-- App Bar -->
+                    <div class="app-bar">
+                        <span class="material-icons menu-icon" onclick="toggleSidebar()">menu</span>
+                        <div class="welcome-text">
+                            <div class="subtitle">Welcome back!</div>
+                            <div class="title">John Trainer</div>
+                        </div>
+                        <div class="notification-badge">
+                            <span class="material-icons">notifications_none</span>
+                            <span class="badge">3</span>
+                        </div>
+                        <div class="avatar">JT</div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="content">
+                        <!-- Overview Section -->
+                        <h2 class="section-title">Overview</h2>
+                        <div class="metrics-grid">
+                            <div class="metric-card blue">
+                                <div class="icon-container">
+                                    <span class="material-icons">people</span>
+                                </div>
+                                <div class="metric-value">24</div>
+                                <div class="metric-label">Total Clients</div>
+                            </div>
+                            <div class="metric-card green">
+                                <div class="icon-container">
+                                    <span class="material-icons">person_pin</span>
+                                </div>
+                                <div class="metric-value">18</div>
+                                <div class="metric-label">Active Clients</div>
+                            </div>
+                            <div class="metric-card orange">
+                                <div class="icon-container">
+                                    <span class="material-icons">today</span>
+                                </div>
+                                <div class="metric-value">5</div>
+                                <div class="metric-label">Today's Sessions</div>
+                            </div>
+                            <div class="metric-card purple">
+                                <div class="icon-container">
+                                    <span class="material-icons">attach_money</span>
+                                </div>
+                                <div class="metric-value">$4,280</div>
+                                <div class="metric-label">Monthly Revenue</div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Section -->
+                        <h2 class="section-title">Analytics</h2>
+                        <div class="chart-container">
+                            <h3 class="chart-title">Weekly Sessions</h3>
+                            <div class="chart">
+                                <div class="bar" style="height: 60%">
+                                    <span class="bar-label">Mon</span>
+                                </div>
+                                <div class="bar" style="height: 80%">
+                                    <span class="bar-label">Tue</span>
+                                </div>
+                                <div class="bar" style="height: 45%">
+                                    <span class="bar-label">Wed</span>
+                                </div>
+                                <div class="bar" style="height: 90%">
+                                    <span class="bar-label">Thu</span>
+                                </div>
+                                <div class="bar" style="height: 70%">
+                                    <span class="bar-label">Fri</span>
+                                </div>
+                                <div class="bar" style="height: 85%">
+                                    <span class="bar-label">Sat</span>
+                                </div>
+                                <div class="bar" style="height: 40%">
+                                    <span class="bar-label">Sun</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Schedule -->
+                        <div class="schedule-section">
+                            <div class="schedule-header">
+                                <h2 class="section-title">Today's Schedule</h2>
+                                <a href="#" class="view-all">View All</a>
+                            </div>
+                            
+                            <div class="session-card">
+                                <div class="time-box">
+                                    <span class="time-main">10:00</span>
+                                    <span class="time-period">AM</span>
+                                </div>
+                                <div class="session-info">
+                                    <div class="client-name">Sarah Johnson</div>
+                                    <div class="session-duration">
+                                        <span class="material-icons" style="font-size: 14px;">access_time</span>
+                                        60 minutes
+                                    </div>
+                                </div>
+                                <div class="status-chip">Scheduled</div>
+                            </div>
+
+                            <div class="session-card">
+                                <div class="time-box">
+                                    <span class="time-main">2:00</span>
+                                    <span class="time-period">PM</span>
+                                </div>
+                                <div class="session-info">
+                                    <div class="client-name">Mike Chen</div>
+                                    <div class="session-duration">
+                                        <span class="material-icons" style="font-size: 14px;">access_time</span>
+                                        45 minutes
+                                    </div>
+                                </div>
+                                <div class="status-chip">Scheduled</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Action Button -->
+                    <div class="floating-action-button">
+                        <span class="material-icons">add</span>
+                        Quick Action
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="sidebar" id="sidebar">
+                        <div class="sidebar-header">
+                            <div class="sidebar-logo">
+                                <span class="material-icons">fitness_center</span>
+                            </div>
+                            <div class="sidebar-title">PT Dashboard</div>
+                            <div class="sidebar-subtitle">Version 2.0</div>
+                        </div>
+                        <div class="sidebar-menu">
+                            <div class="menu-item active">
+                                <span class="material-icons">dashboard</span>
+                                <span class="menu-label">Dashboard</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="material-icons">people</span>
+                                <span class="menu-label">Clients</span>
+                                <span class="menu-badge">24</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="material-icons">calendar_today</span>
+                                <span class="menu-label">Sessions</span>
+                                <span class="menu-badge">5</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="material-icons">attach_money</span>
+                                <span class="menu-label">Revenue</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="material-icons">analytics</span>
+                                <span class="menu-label">Analytics</span>
+                            </div>
+                            <div style="border-top: 1px solid #E0E0E0; margin: 8px 0;"></div>
+                            <div class="menu-item">
+                                <span class="material-icons">chat</span>
+                                <span class="menu-label">Messages</span>
+                            </div>
+                            <div class="menu-item">
+                                <span class="material-icons">settings</span>
+                                <span class="menu-label">Settings</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overlay -->
+                    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+                </div>
+            </div>
+            <p class="screen-label">Dashboard Screen</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        // Animate metrics on load
+        window.addEventListener('load', () => {
+            const metricValues = document.querySelectorAll('.metric-value');
+            metricValues.forEach((value, index) => {
+                const finalValue = value.textContent;
+                const isNumber = !isNaN(finalValue.replace('$', '').replace(',', ''));
+                
+                if (isNumber) {
+                    const numericValue = parseInt(finalValue.replace('$', '').replace(',', ''));
+                    let currentValue = 0;
+                    const increment = numericValue / 50;
+                    const isCurrency = finalValue.includes('$');
+                    
+                    const timer = setInterval(() => {
+                        currentValue += increment;
+                        if (currentValue >= numericValue) {
+                            currentValue = numericValue;
+                            clearInterval(timer);
+                        }
+                        value.textContent = isCurrency 
+                            ? `$${currentValue.toLocaleString('en-US', {maximumFractionDigits: 0})}`
+                            : Math.floor(currentValue).toString();
+                    }, 20);
+                }
+            });
+
+            // Animate bars
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.transition = 'height 0.5s ease-out';
+                    const height = bar.style.height;
+                    bar.style.height = '0%';
+                    setTimeout(() => {
+                        bar.style.height = height;
+                    }, 100);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
+

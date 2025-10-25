@@ -1,0 +1,797 @@
+r!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach App - UI Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 48px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .screens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .phone-frame {
+            background: #1a1a1a;
+            border-radius: 40px;
+            padding: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            z-index: 10;
+        }
+
+        .phone-screen {
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-bar {
+            background: #1976D2;
+            color: white;
+            padding: 50px 20px 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .app-bar h2 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .app-bar .icons {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .tab-bar {
+            display: flex;
+            background: #1565C0;
+            color: white;
+            border-bottom: 2px solid #0D47A1;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: white;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .client-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background: #2196F3;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .client-info {
+            flex: 1;
+        }
+
+        .client-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .client-email {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .badge {
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .calendar {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .calendar-day {
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .calendar-day.header {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .calendar-day.selected {
+            background: #1976D2;
+            color: white;
+        }
+
+        .package-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .package-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .package-price {
+            background: #1976D2;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .package-features {
+            margin: 15px 0;
+            color: #666;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            background: #1976D2;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #1565C0;
+        }
+
+        .bottom-nav {
+            display: flex;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-item.active {
+            color: #1976D2;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+        }
+
+        .status-scheduled { color: #2196F3; }
+        .status-completed { color: #4CAF50; }
+        .status-cancelled { color: #F44336; }
+        .status-pending { color: #FF9800; }
+
+        .progress-bar {
+            height: 8px;
+            background: #E0E0E0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s;
+        }
+
+        .screen-label {
+            text-align: center;
+            color: white;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏋️‍♂️ Coach App - UI Mockup</h1>
+
+        <div class="screens-grid">
+            <!-- iOS Enterprise Login Screen -->
+            <div>
+                <div class="phone-frame">
+                    <div class="phone-screen" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);">
+                        <div style="padding: 60px 20px 30px; text-align: center;">
+                            <div style="width: 120px; height: 120px; margin: 0 auto 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 60px; display: flex; align-items: center; justify-content: center; font-size: 60px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); animation: pulse 2s infinite;">🏋️‍♂️</div>
+                            <h2 style="color: white; font-size: 32px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Welcome Back</h2>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 14px;">Join as a Trainer or find your Coach</p>
+                        </div>
+                        <div style="padding: 0 20px;">
+                            <!-- Sign In / Sign Up Toggle -->
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 25px; padding: 4px; display: flex; gap: 4px; margin-bottom: 24px; backdrop-filter: blur(10px);">
+                                <div style="flex: 1; padding: 12px; text-align: center; background: rgba(255,255,255,0.9); border-radius: 22px; font-weight: 600; color: #1976D2; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">Sign In</div>
+                                <div style="flex: 1; padding: 12px; text-align: center; color: white; cursor: pointer;">Sign Up</div>
+                            </div>
+
+                            <!-- Email Input -->
+                            <div style="background: rgba(255,255,255,0.9); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-size: 20px;">📧</span>
+                                    <input type="text" placeholder="Email" style="flex: 1; border: none; background: none; font-size: 15px; outline: none;">
+                                </div>
+                            </div>
+
+                            <!-- Password Input -->
+                            <div style="background: rgba(255,255,255,0.9); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-size: 20px;">🔒</span>
+                                    <input type="password" placeholder="Password" style="flex: 1; border: none; background: none; font-size: 15px; outline: none;">
+                                    <span style="font-size: 18px; cursor: pointer; opacity: 0.6;">👁️</span>
+                                </div>
+                            </div>
+
+                            <!-- Remember Me & Forgot Password -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 4px;">
+                                <label style="color: rgba(255,255,255,0.9); font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="checkbox" style="width: 16px; height: 16px;"> Remember me
+                                </label>
+                                <span style="color: #60a5fa; font-size: 13px; cursor: pointer; font-weight: 500;">Forgot Password?</span>
+                            </div>
+
+                            <!-- Sign In Button -->
+                            <button style="width: 100%; padding: 16px; border: none; border-radius: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                Sign In to Dashboard
+                                <span style="font-size: 20px;">→</span>
+                            </button>
+
+                            <!-- Divider -->
+                            <div style="display: flex; align-items: center; gap: 12px; margin: 24px 0;">
+                                <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.2);"></div>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 13px;">Or continue with</span>
+                                <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.2);"></div>
+                            </div>
+
+                            <!-- iOS Enterprise Auth Methods -->
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                                <!-- Face ID -->
+                                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                    <div style="font-size: 28px; margin-bottom: 4px;">🔐</div>
+                                    <div style="font-size: 11px; color: rgba(255,255,255,0.9); font-weight: 500;">Face ID</div>
+                                </div>
+
+                                <!-- Passkey -->
+                                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                    <div style="font-size: 28px; margin-bottom: 4px;">🔑</div>
+                                    <div style="font-size: 11px; color: rgba(255,255,255,0.9); font-weight: 500;">Passkey</div>
+                                </div>
+
+                                <!-- Apple -->
+                                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                    <div style="font-size: 28px; margin-bottom: 4px;"></div>
+                                    <div style="font-size: 11px; color: rgba(255,255,255,0.9); font-weight: 500;">Apple</div>
+                                </div>
+                            </div>
+
+                            <!-- Google & Offline -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <!-- Google Sign In -->
+                                <div style="background: white; border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500;">
+                                    <span style="font-size: 20px;">🔵</span>
+                                    <span>Google</span>
+                                </div>
+
+                                <!-- Offline Mode -->
+                                <div style="background: rgba(255,165,0,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,165,0,0.3); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; color: #ffd700;">
+                                    <span style="font-size: 18px;">📡</span>
+                                    <span>Offline</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">iOS Enterprise Login ✨</div>
+            </div>
+
+            <!-- Trainer Dashboard - Overview -->
+            <div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="app-bar">
+                            <h2>Trainer Dashboard</h2>
+                            <div class="icons">
+                                <span>🔔</span>
+                                <span>⚙️</span>
+                            </div>
+                        </div>
+                        <div class="tab-bar">
+                            <div class="tab active">
+                                <div style="font-size: 20px;">📊</div>
+                                <div>Overview</div>
+                            </div>
+                            <div class="tab">
+                                <div style="font-size: 20px;">👥</div>
+                                <div>Clients</div>
+                            </div>
+                            <div class="tab">
+                                <div style="font-size: 20px;">📅</div>
+                                <div>Sessions</div>
+                            </div>
+                            <div class="tab">
+                                <div style="font-size: 20px;">💰</div>
+                                <div>Revenue</div>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="section-title">Dashboard Overview</div>
+                            <div class="stat-grid">
+                                <div class="stat-card" style="background: #E3F2FD;">
+                                    <div class="icon">👥</div>
+                                    <div class="number" style="color: #1976D2;">24</div>
+                                    <div class="label">Total Clients</div>
+                                </div>
+                                <div class="stat-card" style="background: #E8F5E9;">
+                                    <div class="icon">✅</div>
+                                    <div class="number" style="color: #4CAF50;">156</div>
+                                    <div class="label">Completed</div>
+                                </div>
+                            </div>
+                            <div class="stat-grid">
+                                <div class="stat-card" style="background: #FFF3E0;">
+                                    <div class="icon">📅</div>
+                                    <div class="number" style="color: #FF9800;">3</div>
+                                    <div class="label">Today's Sessions</div>
+                                </div>
+                                <div class="stat-card" style="background: #F3E5F5;">
+                                    <div class="icon">🔜</div>
+                                    <div class="number" style="color: #9C27B0;">12</div>
+                                    <div class="label">Upcoming</div>
+                                </div>
+                            </div>
+                            <div class="section-title">Today's Schedule</div>
+                            <div class="client-card">
+                                <div class="avatar">JS</div>
+                                <div class="client-info">
+                                    <div class="client-name">John Smith</div>
+                                    <div class="client-email">09:00 AM • 60 min</div>
+                                </div>
+                            </div>
+                            <div class="client-card">
+                                <div class="avatar" style="background: #FF9800;">SJ</div>
+                                <div class="client-info">
+                                    <div class="client-name">Sarah Johnson</div>
+                                    <div class="client-email">11:00 AM • 45 min</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Trainer - Overview Tab</div>
+            </div>
+
+            <!-- Trainer Dashboard - Clients -->
+            <div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="app-bar">
+                            <h2>Trainer Dashboard</h2>
+                            <div class="icons">
+                                <span>🔔</span>
+                                <span>⚙️</span>
+                            </div>
+                        </div>
+                        <div class="tab-bar">
+                            <div class="tab">
+                                <div style="font-size: 20px;">📊</div>
+                                <div>Overview</div>
+                            </div>
+                            <div class="tab active">
+                                <div style="font-size: 20px;">👥</div>
+                                <div>Clients</div>
+                            </div>
+                            <div class="tab">
+                                <div style="font-size: 20px;">📅</div>
+                                <div>Sessions</div>
+                            </div>
+                            <div class="tab">
+                                <div style="font-size: 20px;">💰</div>
+                                <div>Revenue</div>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="client-card">
+                                <div class="avatar">JS</div>
+                                <div class="client-info">
+                                    <div class="client-name">John Smith</div>
+                                    <div class="client-email">john@example.com</div>
+                                </div>
+                                <div class="badge">24 Sessions</div>
+                            </div>
+                            <div class="client-card">
+                                <div class="avatar" style="background: #FF9800;">SJ</div>
+                                <div class="client-info">
+                                    <div class="client-name">Sarah Johnson</div>
+                                    <div class="client-email">sarah@example.com</div>
+                                </div>
+                                <div class="badge">18 Sessions</div>
+                            </div>
+                            <div class="client-card">
+                                <div class="avatar" style="background: #4CAF50;">MW</div>
+                                <div class="client-info">
+                                    <div class="client-name">Mike Wilson</div>
+                                    <div class="client-email">mike@example.com</div>
+                                </div>
+                                <div class="badge">12 Sessions</div>
+                            </div>
+                            <div class="client-card">
+                                <div class="avatar" style="background: #9C27B0;">ED</div>
+                                <div class="client-info">
+                                    <div class="client-name">Emma Davis</div>
+                                    <div class="client-email">emma@example.com</div>
+                                </div>
+                                <div class="badge">8 Sessions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Trainer - Clients Tab (⭐ Key Feature)</div>
+            </div>
+
+            <!-- Client Home -->
+            <div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="app-bar">
+                            <h2>Welcome, John Smith</h2>
+                            <div class="icons">
+                                <span>🔔</span>
+                                <span>⚙️</span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="stat-grid">
+                                <div class="stat-card" style="background: #E3F2FD;">
+                                    <div class="icon">🏋️‍♂️</div>
+                                    <div class="number" style="color: #1976D2;">24</div>
+                                    <div class="label">Total Sessions</div>
+                                </div>
+                                <div class="stat-card" style="background: #E8F5E9;">
+                                    <div class="icon">📈</div>
+                                    <div class="number" style="color: #4CAF50;">Active</div>
+                                    <div class="label">Status</div>
+                                </div>
+                            </div>
+                            <div class="section-title">Upcoming Sessions</div>
+                            <div class="client-card">
+                                <div class="avatar" style="background: #2196F3;">📅</div>
+                                <div class="client-info">
+                                    <div class="client-name">Oct 14, 2025</div>
+                                    <div class="client-email">09:00 AM • 60 min</div>
+                                </div>
+                                <span style="color: #2196F3;">→</span>
+                            </div>
+                            <div class="client-card">
+                                <div class="avatar" style="background: #2196F3;">📅</div>
+                                <div class="client-info">
+                                    <div class="client-name">Oct 16, 2025</div>
+                                    <div class="client-email">11:00 AM • 45 min</div>
+                                </div>
+                                <span style="color: #2196F3;">→</span>
+                            </div>
+                            <div class="section-title">Quick Actions</div>
+                            <div class="stat-grid">
+                                <div class="stat-card" style="cursor: pointer; background: #F3E5F5;">
+                                    <div class="icon">🛍️</div>
+                                    <div class="label" style="font-size: 16px; font-weight: 600;">Buy Package</div>
+                                </div>
+                                <div class="stat-card" style="cursor: pointer; background: #E8F5E9;">
+                                    <div class="icon">➕</div>
+                                    <div class="label" style="font-size: 16px; font-weight: 600;">Book Session</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-nav">
+                            <div class="nav-item active">
+                                <div class="nav-icon">🏠</div>
+                                <div class="nav-label">Home</div>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">📅</div>
+                                <div class="nav-label">Sessions</div>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">📄</div>
+                                <div class="nav-label">Invoices</div>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">👤</div>
+                                <div class="nav-label">Profile</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Client - Home Screen</div>
+            </div>
+
+            <!-- Booking Screen -->
+            <div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="app-bar">
+                            <h2>← Book Session</h2>
+                        </div>
+                        <div class="content">
+                            <div class="calendar">
+                                <div class="calendar-header">
+                                    <span style="cursor: pointer;">←</span>
+                                    <strong>October 2025</strong>
+                                    <span style="cursor: pointer;">→</span>
+                                </div>
+                                <div class="calendar-grid">
+                                    <div class="calendar-day header">Su</div>
+                                    <div class="calendar-day header">Mo</div>
+                                    <div class="calendar-day header">Tu</div>
+                                    <div class="calendar-day header">We</div>
+                                    <div class="calendar-day header">Th</div>
+                                    <div class="calendar-day header">Fr</div>
+                                    <div class="calendar-day header">Sa</div>
+                                    <div class="calendar-day"></div>
+                                    <div class="calendar-day"></div>
+                                    <div class="calendar-day">1</div>
+                                    <div class="calendar-day">2</div>
+                                    <div class="calendar-day">3</div>
+                                    <div class="calendar-day">4</div>
+                                    <div class="calendar-day">5</div>
+                                    <div class="calendar-day">6</div>
+                                    <div class="calendar-day">7</div>
+                                    <div class="calendar-day">8</div>
+                                    <div class="calendar-day">9</div>
+                                    <div class="calendar-day">10</div>
+                                    <div class="calendar-day">11</div>
+                                    <div class="calendar-day">12</div>
+                                    <div class="calendar-day">13</div>
+                                    <div class="calendar-day selected">14</div>
+                                    <div class="calendar-day">15</div>
+                                    <div class="calendar-day">16</div>
+                                    <div class="calendar-day">17</div>
+                                    <div class="calendar-day">18</div>
+                                    <div class="calendar-day">19</div>
+                                    <div class="calendar-day">20</div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div style="color: #666; margin-bottom: 8px;">🕐 Select Time</div>
+                                <div style="font-weight: 600;">09:00 AM →</div>
+                            </div>
+                            <div class="card">
+                                <div style="color: #666; margin-bottom: 8px;">Session Duration</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <span class="badge">30 min</span>
+                                    <span class="badge">45 min</span>
+                                    <span class="badge" style="background: #1976D2; color: white;">60 min</span>
+                                    <span class="badge">90 min</span>
+                                </div>
+                            </div>
+                            <button class="btn">BOOK SESSION</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Booking Screen (⭐ Calendar)</div>
+            </div>
+
+            <!-- Packages Screen -->
+            <div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="app-bar">
+                            <h2>← Available Packages</h2>
+                        </div>
+                        <div class="content">
+                            <div class="section-title">My Packages</div>
+                            <div class="card">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <strong>Premium Package</strong>
+                                    <span class="badge" style="background: #4CAF50; color: white;">ACTIVE</span>
+                                </div>
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;">6 / 10 sessions remaining</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div class="section-title">Available Packages</div>
+                            <div class="package-card">
+                                <div class="package-header">
+                                    <div class="package-name">Starter</div>
+                                    <div class="package-price">$199</div>
+                                </div>
+                                <p class="package-features">Perfect for beginners. Get started with 5 quality coaching sessions.</p>
+                                <div class="feature-item">📅 5 Sessions</div>
+                                <div class="feature-item">⏰ Valid for 30 days</div>
+                                <div class="feature-item">💰 $39.99 per session</div>
+                                <button class="btn" style="margin-top: 15px;">PURCHASE PACKAGE</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Packages Screen (⭐ Purchase)</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: white; margin-top: 40px; font-size: 18px;">
+            <p>🚀 This is a visual mockup. Run <code style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">flutter run</code> to see the actual app!</p>
+        </div>
+    </div>
+</body>
+</html>

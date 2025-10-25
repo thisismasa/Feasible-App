@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(start \"d:\\Users\\masathomard\\Desktop\\Feasible Flutter\\coach_app\\UI_MOCKUP.html\")",
+      "Bash(find:*)",
+      "Bash(flutter --version:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter devices:*)",
+      "Bash(flutter run:*)",
+      "Bash(timeout /t 20)",
+      "Bash(ipconfig:*)",
+      "Bash(findstr:*)",
+      "Bash(ngrok version:*)",
+      "Read(//d/Users/masathomard/Desktop/**)",
+      "Bash(tar:*)",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip'' -OutFile ''ngrok.zip'' && Expand-Archive -Path ''ngrok.zip'' -DestinationPath ''.'' -Force\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip'' -OutFile ''ngrok.zip''\")",
+      "Bash(powershell -Command \"Expand-Archive -Path ''ngrok.zip'' -DestinationPath ''.'' -Force\")",
+      "Bash(powershell -Command \"Get-ChildItem ''D:\\Users\\masathomard\\Desktop'' | Select-Object Name\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip'' -OutFile ''D:\\Users\\masathomard\\Desktop\\Feasible Flutter\\ngrok.zip''\")",
+      "Bash(powershell -Command:*)",
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(./cloudflared.exe tunnel:*)",
+      "Bash(git config:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git log:*)",
+      "Bash(git rm:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(gh:*)",
+      "Bash(winget install:*)",
+      "Bash(msiexec /i gh_installer.msi /quiet /norestart)",
+      "Bash(./bin/gh.exe:*)",
+      "Bash(git remote:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

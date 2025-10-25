@@ -1,0 +1,71 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                   RUN SQL MIGRATION - QUICK STEPS                        ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+📋 STEP 1: COPY SQL FILE
+   → Open: supabase_migrations/001_enterprise_package_system.sql
+   → Press: Ctrl+A (select all)
+   → Press: Ctrl+C (copy)
+
+📋 STEP 2: OPEN SUPABASE
+   → Go to: https://supabase.com/dashboard
+   → Click: Your project
+   → Click: SQL Editor (left sidebar)
+   → Click: New Query
+
+📋 STEP 3: PASTE & RUN
+   → Press: Ctrl+V (paste SQL)
+   → Click: Run button (or Ctrl+Enter)
+   → Wait: 5-10 seconds
+
+✅ STEP 4: VERIFY
+   → Click: Table Editor (left sidebar)
+   → Look for 5 new tables:
+      ✓ packages
+      ✓ client_packages
+      ✓ promo_codes
+      ✓ promo_code_usage
+      ✓ package_modifications
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 SUPABASE DASHBOARD URL:
+   https://supabase.com/dashboard
+
+📁 SQL FILE LOCATION:
+   D:\Users\masathomard\Desktop\Feasible Flutter\coach_app\supabase_migrations\001_enterprise_package_system.sql
+
+📖 DETAILED GUIDE:
+   D:\Users\masathomard\Desktop\Feasible Flutter\coach_app\RUN_MIGRATION_NOW.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  COMMON ISSUES:
+
+❌ "permission denied"
+   → Solution: Make sure you're logged into Supabase
+
+❌ "relation already exists"
+   → Solution: Tables already created! You're done.
+
+❌ "syntax error"
+   → Solution: Copy the ENTIRE SQL file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ AFTER MIGRATION:
+
+Test with this query:
+   SELECT * FROM packages;
+
+Create your first package:
+   (See RUN_MIGRATION_NOW.md for SQL examples)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 READY TO GO!
+   Your Flutter app can now use PackageServiceEnterprise
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Need help? Check: SUPABASE_SETUP_GUIDE.md

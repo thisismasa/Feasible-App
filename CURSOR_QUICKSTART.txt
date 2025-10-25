@@ -1,0 +1,290 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║               ADD CLAUDE AI TO CURSOR.AI - QUICK GUIDE                       ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+🎯 WHAT IS CURSOR?
+═══════════════════════════════════════════════════════════════════════════════
+
+Cursor is an AI-powered code editor (like VS Code) that integrates:
+✅ Claude (Anthropic) ⭐
+✅ GPT-4
+✅ Other AI models
+
+Perfect for coding with AI assistance!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚡ FASTEST SETUP (2 Minutes)
+═══════════════════════════════════════════════════════════════════════════════
+
+METHOD 1: Use Cursor Pro (EASIEST - NO API KEY NEEDED!)
+────────────────────────────────────────────────────────────────
+
+Step 1: Download Cursor
+──────────────────────
+Website: https://cursor.sh/
+Download and install (just like VS Code)
+
+
+Step 2: Subscribe to Cursor Pro
+──────────────────────────────
+Open Cursor → Settings → Cursor Pro
+Price: $20/month
+Includes: Claude 3.5 Sonnet + GPT-4
+
+
+Step 3: Use Claude
+──────────────────────────────
+Press: Ctrl + K (Windows) or Cmd + K (Mac)
+Select: "Claude 3.5 Sonnet" from dropdown
+Start coding! 🎉
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔑 METHOD 2: Use Your Own API Key (More Control)
+═══════════════════════════════════════════════════════════════════════════════
+
+Step 1: Get Anthropic API Key
+──────────────────────────────
+1. Go to: https://console.anthropic.com/
+2. Sign up / Log in
+3. Create API key (starts with sk-ant-...)
+4. Copy your key
+
+
+Step 2: Add Key to Cursor
+──────────────────────────────
+Press: Ctrl + , (Settings)
+Search: "anthropic"
+Paste your API key
+Save
+
+
+Step 3: Select Claude
+──────────────────────────────
+Press: Ctrl + K
+Select: Claude 3.5 Sonnet
+Done! ✅
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎮 HOW TO USE CLAUDE IN CURSOR
+═══════════════════════════════════════════════════════════════════════════════
+
+KEYBOARD SHORTCUTS
+──────────────────────────────
+
+Ctrl + L     → Open Claude chat
+Ctrl + K     → Inline code edit
+Ctrl + I     → Composer (multi-file)
+Ctrl + ,     → Settings
+
+
+EXAMPLE USAGE
+──────────────────────────────
+
+1. Chat Mode (Ctrl + L)
+───────────────────────
+Press: Ctrl + L
+Type: "Create a Flutter login widget"
+Claude: Creates the widget code for you
+
+
+2. Inline Edit (Ctrl + K)
+───────────────────────
+Select code
+Press: Ctrl + K
+Type: "Add error handling"
+Claude: Updates your code
+
+
+3. Composer (Ctrl + I)
+───────────────────────
+Press: Ctrl + I
+Type: "Create login, home, and profile screens"
+Claude: Creates multiple files at once
+
+
+4. Context-Aware
+───────────────────────
+Type: @workspace Explain this Flutter app
+Type: @file What does this do?
+Type: @code Review this code
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💰 PRICING
+═══════════════════════════════════════════════════════════════════════════════
+
+Option 1: Cursor Pro
+────────────────────
+$20/month
+✅ 500 premium requests/month
+✅ Claude + GPT-4 included
+✅ No API key management
+✅ Simplest option
+
+
+Option 2: Own API Key
+────────────────────
+Pay-as-you-go
+✅ Claude Sonnet: ~$3 per million tokens
+✅ 100 questions ≈ $0.20
+✅ Good for light usage
+⚠️  Need to manage billing
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 QUICK START (Copy-Paste)
+═══════════════════════════════════════════════════════════════════════════════
+
+# 1. Download Cursor
+Go to: https://cursor.sh/
+
+# 2. Install Cursor
+Run installer
+
+# 3. Subscribe to Cursor Pro (easiest)
+Settings → Cursor Pro → Subscribe
+
+# 4. Use Claude
+Ctrl + K → Select "Claude 3.5 Sonnet"
+
+# 5. Start coding!
+Ask Claude anything!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💡 EXAMPLE: Using Claude for Your Flutter App
+═══════════════════════════════════════════════════════════════════════════════
+
+Scenario: Open your coach_app in Cursor
+────────────────────────────────────────────
+
+1. File → Open Folder → Select "coach_app"
+
+2. Press Ctrl + L (Chat)
+
+3. Ask Claude:
+   "Explain the structure of this Flutter app"
+   "@workspace Show me all the screens"
+   "How does the booking system work?"
+
+4. Press Ctrl + K (Edit)
+   Select code → "Add comments and improve this"
+
+5. Press Ctrl + I (Build)
+   "Create a new settings screen with theme options"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔧 CURSOR SETTINGS FOR CLAUDE
+═══════════════════════════════════════════════════════════════════════════════
+
+Press: Ctrl + Shift + P
+Type: "Preferences: Open User Settings (JSON)"
+
+Add this:
+─────────
+
+{
+  // Use Claude as default
+  "cursor.chat.defaultModel": "claude-3-5-sonnet-20241022",
+
+  // API Key (if using your own)
+  "anthropic.apiKey": "sk-ant-YOUR-KEY-HERE",
+
+  // Enable features
+  "cursor.chat.enabled": true,
+  "cursor.autocomplete.enabled": true
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🆘 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+"Claude not available"
+──────────────────────
+✓ Check Cursor Pro subscription
+✓ Or verify API key is set
+✓ Restart Cursor
+
+
+"Invalid API key"
+──────────────────────
+✓ Check key starts with "sk-ant-"
+✓ Verify at: https://console.anthropic.com/
+✓ Re-paste key in settings
+
+
+"Rate limit exceeded"
+──────────────────────
+✓ Wait a few minutes
+✓ Check monthly limit (Cursor Pro)
+✓ Check API usage (own key)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 LEARN MORE
+═══════════════════════════════════════════════════════════════════════════════
+
+Cursor Website:      https://cursor.sh/
+Cursor Docs:         https://docs.cursor.com/
+Anthropic Console:   https://console.anthropic.com/
+Full Guide:          ADD_CLAUDE_TO_CURSOR.md
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ SETUP CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+□ Download Cursor from cursor.sh
+□ Install Cursor
+□ Choose: Cursor Pro OR Get API key
+□ If Cursor Pro: Subscribe ($20/month)
+□ If API key: Add to settings
+□ Press Ctrl + K
+□ Select "Claude 3.5 Sonnet"
+□ Start coding with AI! 🚀
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🌟 WHY USE CLAUDE IN CURSOR?
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ AI-powered code completion
+✅ Explain code instantly
+✅ Debug and fix errors
+✅ Generate entire features
+✅ Refactor code automatically
+✅ Context-aware (knows your project)
+✅ Multi-file editing
+✅ Best for Flutter development
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 RECOMMENDATION
+═══════════════════════════════════════════════════════════════════════════════
+
+For your Flutter coach app:
+
+1. Download Cursor
+2. Subscribe to Cursor Pro ($20/month)
+3. Open your coach_app folder
+4. Use Claude to:
+   - Understand the code
+   - Add new features
+   - Debug issues
+   - Optimize performance
+   - Generate documentation
+
+It's like having an AI Flutter expert helping you! 🤖💻
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    Ready to code with AI assistance! 🚀
+
+                    Download: https://cursor.sh/
+
+═══════════════════════════════════════════════════════════════════════════════

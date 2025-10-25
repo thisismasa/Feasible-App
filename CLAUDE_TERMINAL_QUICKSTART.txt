@@ -1,0 +1,243 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                 USE CLAUDE AI IN TERMINAL - QUICK GUIDE                      ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+🎯 WHAT YOU NEED
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ✅ Anthropic API Key (from https://console.anthropic.com/)
+2. ✅ Python installed
+3. ✅ Anthropic library (pip install anthropic)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚡ FASTEST SETUP (Copy-Paste Commands)
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Install Python library
+───────────────────────────────
+pip install anthropic
+
+
+STEP 2: Set your API key (Replace YOUR-KEY with actual key)
+────────────────────────────────────────────────────────────
+$env:ANTHROPIC_API_KEY = "sk-ant-YOUR-KEY-HERE"
+
+
+STEP 3: Run interactive chat
+────────────────────────────────────────────────────────────
+cd "d:\Users\masathomard\Desktop\Feasible Flutter"
+python claude-chat.py
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🤖 TWO WAYS TO USE CLAUDE
+═══════════════════════════════════════════════════════════════════════════════
+
+METHOD 1: Interactive Chat (Recommended)
+─────────────────────────────────────────
+python claude-chat.py
+
+Then type your questions and get responses!
+Type 'exit' to quit.
+
+
+METHOD 2: Single Question
+─────────────────────────────────────────
+python claude-cli.py "Your question here"
+
+Example:
+python claude-cli.py "Explain how to use Flutter"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 MENU-DRIVEN SETUP (EASIEST!)
+═══════════════════════════════════════════════════════════════════════════════
+
+Double-click this file:
+SETUP_CLAUDE.bat
+
+It will guide you through:
+1. Checking Python
+2. Installing library
+3. Setting API key
+4. Running Claude
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔑 GET YOUR API KEY
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Go to: https://console.anthropic.com/
+2. Sign up / Log in
+3. Go to "API Keys" section
+4. Click "Create Key"
+5. Copy your key (starts with sk-ant-...)
+6. Add payment method (required for API)
+
+💰 Pricing:
+- Claude Sonnet: ~$3 per million tokens
+- 100 questions ≈ $0.20
+- Very affordable!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ COMPLETE SETUP SEQUENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+# 1. Navigate to folder
+cd "d:\Users\masathomard\Desktop\Feasible Flutter"
+
+# 2. Check Python is installed
+python --version
+
+# 3. Install Anthropic library
+pip install anthropic
+
+# 4. Set API key (replace with your actual key)
+$env:ANTHROPIC_API_KEY = "sk-ant-YOUR-KEY-HERE"
+
+# 5. Run interactive chat
+python claude-chat.py
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎮 USING THE INTERACTIVE CHAT
+═══════════════════════════════════════════════════════════════════════════════
+
+After running: python claude-chat.py
+
+Commands:
+  You: Your message here     → Chat with Claude
+  You: clear                 → Start new conversation
+  You: help                  → Show commands
+  You: exit                  → Quit chat
+
+Example session:
+───────────────
+You: Hello Claude!
+🤖 Claude: Hello! How can I help you today?
+
+You: Explain recursion simply
+🤖 Claude: Recursion is when a function calls itself...
+
+You: exit
+👋 Goodbye!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💻 EXAMPLE COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+Interactive chat:
+─────────────────
+python claude-chat.py
+
+
+Single questions:
+─────────────────
+python claude-cli.py "What is quantum computing?"
+
+python claude-cli.py "Write a Python function to reverse a string"
+
+python claude-cli.py "Explain Flutter widgets"
+
+python claude-cli.py "How do I use Firebase with Flutter?"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔐 SECURE YOUR API KEY (Recommended)
+═══════════════════════════════════════════════════════════════════════════════
+
+Instead of temporary setting, make it permanent:
+
+PowerShell (Permanent):
+───────────────────────
+[System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', 'your-key-here', 'User')
+
+Then close and reopen terminal.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🐛 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+"Python not found"
+──────────────────
+Solution: Install Python from https://www.python.org/downloads/
+Make sure to check "Add Python to PATH"
+
+
+"Module 'anthropic' not found"
+──────────────────────────────
+Solution: pip install anthropic
+
+
+"Invalid API key"
+─────────────────
+Solution: Check your key at https://console.anthropic.com/
+Make sure it starts with "sk-ant-"
+
+
+"API key not set"
+─────────────────
+Solution: Run this command (with your actual key):
+$env:ANTHROPIC_API_KEY = "sk-ant-YOUR-KEY-HERE"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 FILES CREATED FOR YOU
+═══════════════════════════════════════════════════════════════════════════════
+
+claude-chat.py              → Interactive chat script
+claude-cli.py               → Single question script
+SETUP_CLAUDE.bat            → Menu-driven setup
+CLAUDE_CLI_SETUP.md         → Complete guide
+CLAUDE_TERMINAL_QUICKSTART.txt → This file
+
+All in: d:\Users\masathomard\Desktop\Feasible Flutter\
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 QUICK START (3 Steps)
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Get API key from: https://console.anthropic.com/
+
+2. Run this (replace YOUR-KEY):
+   pip install anthropic
+   $env:ANTHROPIC_API_KEY = "sk-ant-YOUR-KEY-HERE"
+
+3. Chat with Claude:
+   python claude-chat.py
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💡 TIPS
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ Use claude-chat.py for conversations
+✓ Use claude-cli.py for quick questions
+✓ Keep your API key secret
+✓ Check usage at: https://console.anthropic.com/
+✓ Cost is very low (~$0.002 per question)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🌟 WHAT YOU CAN ASK CLAUDE
+═══════════════════════════════════════════════════════════════════════════════
+
+• Programming questions (Python, Flutter, JavaScript, etc.)
+• Code debugging and explanations
+• Algorithm explanations
+• Best practices and design patterns
+• Help with your Flutter app
+• General questions about anything!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    Ready to chat with Claude! 🚀
+
+                    Start with: python claude-chat.py
+
+═══════════════════════════════════════════════════════════════════════════════
