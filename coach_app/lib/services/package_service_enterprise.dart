@@ -153,7 +153,7 @@ class PackageServiceEnterprise {
     try {
       final response = await _supabase
           .from('client_packages')
-          .select('*, packages!inner(*)')
+          .select('*, packages(*)')
           .eq('client_id', clientId)
           .order('purchase_date', ascending: false);
 
@@ -190,7 +190,7 @@ class PackageServiceEnterprise {
     try {
       final response = await _supabase
           .from('client_packages')
-          .select('*, packages!inner(*)')
+          .select('*, packages(*)')
           .eq('package_id', packageId);
 
       final List<ClientPackageEnterprise> clients = [];
@@ -494,7 +494,7 @@ class PackageServiceEnterprise {
     try {
       final response = await _supabase
           .from('client_packages')
-          .select('*, packages!inner(*)')
+          .select('*, packages(*)')
           .eq('id', clientPackageId)
           .single();
 
@@ -699,7 +699,7 @@ class PackageServiceEnterprise {
     try {
       final response = await _supabase
           .from('client_packages')
-          .select('*, packages!inner(*)')
+          .select('*, packages(*)')
           .eq('trainer_id', trainerId);
 
       final packages = response as List;

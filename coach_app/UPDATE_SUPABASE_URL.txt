@@ -1,0 +1,69 @@
+========================================
+  UPDATE SUPABASE WITH NEW URL
+========================================
+
+NEW URL (already in clipboard):
+https://chronic-speed-price-best.trycloudflare.com
+
+========================================
+STEP-BY-STEP INSTRUCTIONS:
+========================================
+
+The Supabase URL Configuration page is now open.
+
+1. Find "Site URL" field
+   - Clear the old URL
+   - Paste the NEW URL: https://chronic-speed-price-best.trycloudflare.com
+
+2. Find "Redirect URLs" section
+   - Remove old URL if present:
+     ❌ https://notes-injuries-comparing-programming.trycloudflare.com
+
+   - Add NEW URL:
+     ✅ https://chronic-speed-price-best.trycloudflare.com
+
+   - Also add with wildcard (if not there):
+     ✅ https://chronic-speed-price-best.trycloudflare.com/**
+
+3. Click "SAVE" at bottom
+
+4. Wait for "Settings saved" confirmation
+
+========================================
+WHY THIS IS IMPORTANT:
+========================================
+
+Supabase uses these URLs to:
+- Validate OAuth redirects from Google
+- Allow callbacks after sign-in
+- Security verification
+
+If Supabase has the WRONG URL:
+- Google sign-in will FAIL
+- "Redirect URI mismatch" error
+- "Sign-in was cancelled" error
+
+Both Google OAuth AND Supabase need the SAME URL!
+
+========================================
+AFTER SAVING:
+========================================
+
+✅ Google OAuth Client: Updated with chronic-speed-price-best
+✅ Supabase URLs: Updated with chronic-speed-price-best
+✅ Both saved and confirmed
+
+Then:
+1. Wait 2-3 minutes (for changes to propagate)
+2. Enable popups in Chrome
+3. Refresh app page
+4. Click "Google" button
+5. Should work!
+
+========================================
+URL IN CLIPBOARD:
+========================================
+
+https://chronic-speed-price-best.trycloudflare.com
+
+Just paste with Ctrl+V in Supabase!

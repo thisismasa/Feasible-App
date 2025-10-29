@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/session_model.dart';
 import '../models/package_model.dart';
 import 'supabase_service.dart';
+import 'google_calendar_service.dart';
 
 /// Enhanced Booking Service - Production Ready
 /// Features: Transactions, race condition protection, offline support, retry logic
@@ -224,7 +225,9 @@ class BookingService {
   bool _checkMinAdvanceTime(DateTime scheduledDate, int minHours) {
     final now = DateTime.now();
     final minBookingTime = now.add(Duration(hours: minHours));
-    return scheduledDate.isAfter(minBookingTime);
+    // Changed from isAfter to !isBefore to allow booking AT the minimum time (not just after)
+    // This fixes "0 hours advance" to allow booking from NOW onwards, not just future
+    return !scheduledDate.isBefore(minBookingTime);
   }
 
   /// Check if time is within business hours
@@ -245,25 +248,27 @@ class BookingService {
       return hour >= 8 && endHour <= 14;
     }
     
-    // Weekdays: 6 AM - 9 PM
-    return hour >= 6 && endHour <= 21;
+    // Weekdays: 7 AM - 10 PM
+    return hour >= 7 && endHour <= 22;
   }
 
   /// Check for scheduling conflicts with locking
+  /// Now checks BOTH database AND Google Calendar to prevent double bookings
   Future<List<DateTime>> _checkConflicts(
     String trainerId,
     List<DateTime> proposedDates,
     int duration,
   ) async {
     final conflicts = <DateTime>[];
-    
+
     for (final date in proposedDates) {
       final sessionEnd = date.add(Duration(minutes: duration));
-      
+
       // Check for overlapping sessions (with 15min buffer)
       final bufferStart = date.subtract(const Duration(minutes: 15));
       final bufferEnd = sessionEnd.add(const Duration(minutes: 15));
-      
+
+      // 1. Check database for conflicts
       final response = await SupabaseService.instance.client
           .from('sessions')
           .select()
@@ -271,12 +276,48 @@ class BookingService {
           .gte('scheduled_date', bufferStart.toIso8601String())
           .lte('scheduled_date', bufferEnd.toIso8601String())
           .neq('status', 'cancelled');
-      
+
       if (response is List && (response as List).isNotEmpty) {
         conflicts.add(date);
+        continue; // Already has conflict, skip Google Calendar check
+      }
+
+      // 2. Check Google Calendar for conflicts
+      try {
+        final calendarService = GoogleCalendarService.instance;
+
+        // Only check if user is signed in with Google
+        if (calendarService.isGoogleSignedIn) {
+          final calendarEvents = await calendarService.getEvents(
+            startDate: bufferStart,
+            endDate: bufferEnd,
+          );
+
+          // Check if any calendar event conflicts with proposed time
+          for (final event in calendarEvents) {
+            if (event.start?.dateTime == null || event.end?.dateTime == null) {
+              continue; // Skip all-day events
+            }
+
+            final eventStart = event.start!.dateTime!;
+            final eventEnd = event.end!.dateTime!;
+
+            // Check for overlap
+            if (bufferStart.isBefore(eventEnd) && bufferEnd.isAfter(eventStart)) {
+              print('⚠️ Google Calendar conflict detected with: ${event.summary}');
+              conflicts.add(date);
+              break; // Found conflict, no need to check more events
+            }
+          }
+        }
+      } catch (e) {
+        // Don't fail booking if Google Calendar check fails
+        // But log the error for debugging
+        print('⚠️ Could not check Google Calendar for conflicts: $e');
+        // Continue with booking based on database check only
       }
     }
-    
+
     return conflicts;
   }
 
@@ -418,7 +459,7 @@ class BookingRequest {
     required this.sessionType,
     this.location,
     this.notes,
-    this.minAdvanceHours = 2,
+    this.minAdvanceHours = 0, // ✅ Changed from 2 to 0 to allow same-day booking
   });
 }
 
@@ -592,12 +633,13 @@ class AvailabilityCalculator {
     List<SessionModel> sessions,
     DateTime date,
   ) {
-    // Check minimum advance time (2 hours)
+    // Check minimum advance time (0 hours = allow today)
     final now = DateTime.now();
-    final minTime = now.add(const Duration(hours: 2));
+    // Subtract 1 minute buffer to allow booking slots in the current minute
+    final minTime = now.subtract(const Duration(minutes: 1));
     if (slot.startTime.isBefore(minTime)) {
       slot.isAvailable = false;
-      slot.unavailableReason = 'Too soon';
+      slot.unavailableReason = 'Time has passed';
       slot.displayColor = const Color(0xFFE0E0E0);
       return;
     }
@@ -667,7 +709,7 @@ class AvailabilityCalculator {
       return _BusinessHours(isOpen: true, startHour: 8, endHour: 14);
     }
     
-    return _BusinessHours(isOpen: true, startHour: 6, endHour: 21);
+    return _BusinessHours(isOpen: true, startHour: 7, endHour: 22);
   }
 }
 
@@ -678,8 +720,8 @@ class _BusinessHours {
 
   _BusinessHours({
     required this.isOpen,
-    this.startHour = 6,
-    this.endHour = 21,
+    this.startHour = 7, // 7 AM default
+    this.endHour = 22, // 10 PM default
   });
 }
 

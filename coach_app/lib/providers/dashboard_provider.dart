@@ -76,7 +76,30 @@ class DashboardProvider extends ChangeNotifier {
   String? get error => _error;
   Map<String, List<Map<String, dynamic>>> get chatMessages => _chatMessages;
   
+  /// Reset provider to clean state (call on logout or before new user login)
+  void reset() {
+    debugPrint('🔄 Resetting DashboardProvider to default state');
+
+    _metrics = null;
+    _clients = [];
+    _sessions = [];
+    _todaySessions = [];
+    _packages = [];
+    _chatMessages = {};
+    _notifications = [];
+    _isLoading = false;
+    _error = null;
+    _trainerId = null;
+
+    notifyListeners();
+    debugPrint('✅ DashboardProvider reset complete');
+  }
+
   Future<void> initialize(String trainerId) async {
+    // CRITICAL: Reset all data first to prevent data leakage between users
+    debugPrint('🔒 Initializing dashboard for new user: $trainerId');
+    reset();
+
     _trainerId = trainerId;
     _isLoading = true;
     _error = null;
@@ -128,7 +151,7 @@ class DashboardProvider extends ChangeNotifier {
 
       _calculateMetrics();
 
-      debugPrint('✓ Dashboard loaded successfully');
+      debugPrint('✓ Dashboard loaded successfully for user: $trainerId');
       _isLoading = false;
       notifyListeners();
     } catch (e) {

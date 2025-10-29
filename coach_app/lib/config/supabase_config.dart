@@ -7,9 +7,9 @@ class SupabaseConfig {
   // Note: This is the publishable (anon) key - safe to use in Flutter app
   // Protected by Row Level Security (RLS) policies in Supabase
   
-  // Google OAuth configuration (optional)
-  static const String googleWebClientId = 'YOUR_GOOGLE_WEB_CLIENT_ID';
-  static const String googleIosClientId = 'YOUR_GOOGLE_IOS_CLIENT_ID';
+  // Google OAuth configuration
+  static const String googleWebClientId = '576001465184-pv04h51b3pl92hkdibgssabm2cegbq6r.apps.googleusercontent.com';
+  static const String googleIosClientId = 'YOUR_GOOGLE_IOS_CLIENT_ID'; // Not needed for web app
   
   // Realtime channel names
   static const String sessionsChannel = 'sessions-channel';

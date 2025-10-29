@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'dart:math' as math;
 import '../services/supabase_service.dart';
 import '../services/real_supabase_service.dart';
+import '../services/google_calendar_service.dart';
 import '../models/user_model.dart';
 import '../config/supabase_config.dart';
 import 'biometric_auth_screen.dart';
@@ -1532,7 +1533,19 @@ class _EnhancedLoginScreenState extends State<EnhancedLoginScreen>
     setState(() => _isLoading = true);
 
     try {
-      await SupabaseService.instance.signInWithGoogle();
+      // Use GoogleCalendarService for direct Google Sign-In
+      // This avoids the Supabase OAuth redirect and gives us calendar access
+      final success = await GoogleCalendarService.instance.promptGoogleSignIn();
+
+      if (!success) {
+        throw Exception('Google sign-in was cancelled');
+      }
+
+      // Get the signed-in user's email
+      final userEmail = GoogleCalendarService.instance.userEmail;
+
+      debugPrint('✅ Google Sign-In successful: $userEmail');
+      debugPrint('🎯 Navigating to trainer dashboard...');
 
       if (mounted) {
         setState(() {
@@ -1543,8 +1556,8 @@ class _EnhancedLoginScreenState extends State<EnhancedLoginScreen>
         _successController.forward();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✓ Successfully signed in with Google!'),
+          SnackBar(
+            content: Text('✓ Successfully signed in with Google!\n$userEmail'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -1552,26 +1565,29 @@ class _EnhancedLoginScreenState extends State<EnhancedLoginScreen>
 
         await Future.delayed(const Duration(milliseconds: 1500));
 
+        // Navigate directly to trainer dashboard
+        // No redirect to callback URL, straight to the app!
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => TrainerDashboardEnhanced(
-              trainerId: 'google-user-id',
+              trainerId: userEmail ?? 'google-trainer',
             ),
           ),
         );
       }
     } catch (e) {
+      debugPrint('❌ Google sign-in failed: $e');
+
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Google sign in: ${e.toString()}'),
-            backgroundColor: Colors.orange,
+            content: Text('❌ Google sign-in failed: ${e.toString()}\n\nTry again or use Email/Password login.'),
+            backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
           ),
         );
-        // Demo mode fallback
-        _handleDemoLogin();
       }
     }
   }

@@ -7,6 +7,7 @@ import '../models/user_model.dart';
 import '../models/package_model.dart';
 import '../models/session_model.dart';
 import '../services/database_service.dart';
+import 'booking_management_screen.dart';
 
 /// Enhanced Booking Screen - Production Ready with Advanced Features
 /// Fixes: Race conditions, time conflicts, business logic, UX improvements
@@ -147,8 +148,8 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
   }
 
   PreferredSizeWidget _buildAppBar() {
-    final steps = ['Date & Time', 'Details', 'Confirm'];
-    
+    final steps = ['Date & Time', 'Review'];
+
     return AppBar(
       title: const Text('Book Session', style: TextStyle(fontWeight: FontWeight.bold)),
       backgroundColor: Colors.blue,
@@ -233,8 +234,7 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
       physics: const NeverScrollableScrollPhysics(),
       children: [
         _buildDateTimeStep(),
-        _buildDetailsStep(),
-        _buildConfirmationStep(),
+        _buildReviewStep(), // Combine Details + Review into one Review step
       ],
     );
   }
@@ -247,7 +247,7 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
         children: [
           _buildSectionHeader(
             'Select Date',
-            'Choose a date for your training session',
+            'Choose the date for your session',
             Icons.calendar_today,
             Colors.blue,
           ),
@@ -321,19 +321,21 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
     );
   }
 
-  Widget _buildConfirmationStep() {
+  // Step 2: Review ONLY (no details entry, just review summary like 50.PNG)
+  Widget _buildReviewStep() {
     if (_selectedDay == null || _selectedSlot == null) {
-      return const Center(child: Text('Please complete previous steps'));
+      return const Center(child: Text('Please select date and time first'));
     }
-    
+
     final totalSessions = _isRecurring ? _recurrenceCount : 1;
     final recurringDates = _isRecurring ? _calculateRecurringDates() : [_selectedDay!];
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -363,6 +365,8 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
             ),
           ),
           const SizedBox(height: 24),
+
+          // Client Information
           _buildConfirmationCard(
             'Client Information',
             Icons.person,
@@ -374,6 +378,8 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
             ],
           ),
           const SizedBox(height: 16),
+
+          // Session Details (using default values)
           _buildConfirmationCard(
             'Session Details',
             Icons.fitness_center,
@@ -390,6 +396,8 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
             ],
           ),
           const SizedBox(height: 16),
+
+          // Package Information
           _buildConfirmationCard(
             'Package Information',
             Icons.card_giftcard,
@@ -401,23 +409,27 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
               _buildDetailRow('Expires', DateFormat('MMM d, yyyy').format(widget.package.expiryDate)),
             ],
           ),
+
+          // Recurring Dates (if applicable)
           if (_isRecurring) ...[
             const SizedBox(height: 16),
             _buildConfirmationCard(
               'Recurring Dates',
               Icons.calendar_month,
               Colors.purple,
-              recurringDates.map((date) => 
+              recurringDates.map((date) =>
                 _buildDetailRow(
                   DateFormat('EEEE').format(date),
                   DateFormat('MMM d, yyyy h:mm a').format(
-                    DateTime(date.year, date.month, date.day, 
+                    DateTime(date.year, date.month, date.day,
                       _selectedSlot!.startTime.hour, _selectedSlot!.startTime.minute),
                   ),
                 )
               ).toList(),
             ),
           ],
+
+          // Session Notes (if any)
           if (_notesController.text.isNotEmpty) ...[
             const SizedBox(height: 16),
             _buildConfirmationCard(
@@ -435,11 +447,17 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
               ],
             ),
           ],
+
           const SizedBox(height: 24),
           _buildCancellationPolicy(),
         ],
       ),
     );
+  }
+
+  // Keep old functions for compatibility
+  Widget _buildConfirmationStep() {
+    return _buildReviewStep();
   }
 
   Widget _buildSectionHeader(String title, String subtitle, IconData icon, Color color) {
@@ -481,9 +499,10 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
 
   Widget _buildEnhancedCalendar() {
     final now = DateTime.now();
-    final minDate = now.add(Duration(hours: constraints.minAdvanceHours));
-    final maxDate = now.add(Duration(days: constraints.maxAdvanceDays));
-    
+    final today = DateUtils.dateOnly(now);
+    final minDate = today;
+    final maxDate = today.add(const Duration(days: 30)); // Allow 30 days advance booking
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -499,11 +518,15 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
       child: TableCalendar(
         firstDay: minDate,
         lastDay: maxDate,
-        focusedDay: _focusedDay, // Use _focusedDay instead of _selectedDay
+        focusedDay: _focusedDay ?? today, // Use _focusedDay or default to today
         selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
         calendarFormat: CalendarFormat.month,
         startingDayOfWeek: StartingDayOfWeek.monday,
         availableGestures: AvailableGestures.horizontalSwipe,
+        enabledDayPredicate: (day) {
+          // Allow today and future dates within maxDate range
+          return !day.isBefore(minDate) && !day.isAfter(maxDate);
+        },
         calendarStyle: CalendarStyle(
           selectedDecoration: BoxDecoration(
             gradient: LinearGradient(
@@ -1292,21 +1315,31 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
             if (_currentStep > 0) const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: (_selectedDay != null && _selectedSlot != null) || _currentStep > 0 ? _handleNext : null,
+                // ✅ FIX: Disable button while loading to prevent double-booking
+                onPressed: !_isLoading && ((_selectedDay != null && _selectedSlot != null) || _currentStep > 0) ? _handleNext : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: (_selectedDay != null && _selectedSlot != null) || _currentStep > 0 ? Colors.blue : Colors.grey.shade300,
+                  backgroundColor: !_isLoading && ((_selectedDay != null && _selectedSlot != null) || _currentStep > 0) ? Colors.blue : Colors.grey.shade300,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.all(16),
                   disabledBackgroundColor: Colors.grey.shade300,
                 ),
-                child: Text(
-                  _currentStep == 2 ? 'Confirm Booking' : 'Continue',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: (_selectedDay != null && _selectedSlot != null) || _currentStep > 0 ? Colors.white : Colors.grey.shade600,
-                  ),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        _currentStep == 1 ? 'Confirm Booking' : 'Continue',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: !_isLoading && ((_selectedDay != null && _selectedSlot != null) || _currentStep > 0) ? Colors.white : Colors.grey.shade600,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -1372,8 +1405,12 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
   void _validateSlot(TimeSlotInfo slot, DateTime date) {
     // Check minimum advance time
     final now = DateTime.now();
-    final minBookingTime = now.add(Duration(hours: constraints.minAdvanceHours));
-    
+    // Subtract 1 minute buffer to allow booking slots in the current minute
+    // This fixes issue where milliseconds in DateTime.now() would reject current-minute slots
+    final minBookingTime = now
+        .add(Duration(hours: constraints.minAdvanceHours))
+        .subtract(const Duration(minutes: 1));
+
     if (slot.startTime.isBefore(minBookingTime)) {
       slot.isAvailable = false;
       slot.unavailableReason = 'Too soon (${constraints.minAdvanceHours}h min)';
@@ -1456,47 +1493,51 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
           return false;
         }
         return true;
-      case 2:
-        return true;
       default:
         return false;
     }
   }
 
   void _handleNext() async {
-    if (_currentStep < 2) {
+    if (_currentStep < 1) {
       HapticFeedback.lightImpact();
       setState(() => _currentStep++);
     } else {
+      // On Step 2 (Review), directly book and show success
       await _confirmBooking();
     }
   }
 
   Future<void> _confirmBooking() async {
+    // ✅ FIX: Prevent double-booking by checking if already loading
+    if (_isLoading) {
+      debugPrint('⚠️ Booking already in progress, ignoring duplicate request');
+      return;
+    }
+
     setState(() => _isLoading = true);
-    
+
     try {
       // Validate package one more time
       final packageValidation = await _validatePackage();
       if (!packageValidation.isValid) {
         throw BookingException(packageValidation.reason);
       }
-      
+
       // Create booking(s) with transaction
       final dates = _calculateRecurringDates();
       await _bookSessionsTransaction(dates);
-      
-      // Show success
+
+      // Show success dialog and let it handle navigation
+      // ✅ FIX: Success dialog now handles the Navigator.pop
       await _showSuccessDialog();
-      
-      if (mounted) {
-        Navigator.pop(context, true);
-      }
+
+      // ✅ FIX: Removed extra Navigator.pop - success dialog handles it
     } catch (e) {
       _showErrorSnackbar(e.toString());
-    } finally {
       setState(() => _isLoading = false);
     }
+    // ✅ FIX: Don't reset _isLoading here - let success dialog do it after navigation
   }
 
   Future<PackageValidation> _validatePackage() async {
@@ -1528,6 +1569,11 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
   }
 
   Future<void> _bookSessionsTransaction(List<DateTime> dates) async {
+    // Track calendar sync status
+    bool hasCalendarSyncFailure = false;
+    String? calendarErrorMessage;
+    String? calendarErrorType;
+
     // Use DatabaseService with transaction-safe booking
     for (final date in dates) {
       final sessionDateTime = DateTime(
@@ -1537,6 +1583,13 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
         _selectedSlot!.startTime.hour,
         _selectedSlot!.startTime.minute,
       );
+
+      debugPrint('📅 BOOKING SESSION:');
+      debugPrint('  👤 Client: ${widget.client.name} (${widget.client.id})');
+      debugPrint('  📦 Package: ${widget.package.packageName} (${widget.package.id})');
+      debugPrint('  ⏰ Time: $sessionDateTime');
+      debugPrint('  ⏱️  Duration: $_duration minutes');
+      debugPrint('  📍 Location: $_selectedLocation');
 
       // Book each session using the RPC function
       final result = await DatabaseService.instance.bookSession(
@@ -1551,19 +1604,150 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
       );
 
       if (!result['success']) {
-        // Handle booking failure
-        throw BookingException(
-          result['message'] ?? 'Failed to book session: ${result['error']}'
-        );
+        // Handle booking failure - extract detailed error message
+        debugPrint('❌ Booking failed with result: $result');
+
+        // Try multiple fields for error message
+        String errorMessage = 'Unknown error';
+
+        if (result['message'] != null && result['message'].toString().isNotEmpty) {
+          errorMessage = result['message'].toString();
+        } else if (result['error'] != null && result['error'].toString().isNotEmpty) {
+          errorMessage = result['error'].toString();
+        } else if (result['errors'] != null) {
+          // Database returns errors as array
+          final errors = result['errors'];
+          if (errors is List && errors.isNotEmpty) {
+            errorMessage = errors.join(', ');
+          }
+        }
+
+        debugPrint('❌ Error message: $errorMessage');
+        throw BookingException(errorMessage);
       }
 
-      debugPrint('✓ Session booked: ${result['session_id']}');
+      debugPrint('✅ Session booked successfully: ${result['session_id']}');
+
+      // Check for calendar sync issues
+      if (result['calendar_synced'] == false) {
+        hasCalendarSyncFailure = true;
+        calendarErrorMessage = result['calendar_error'] as String?;
+        calendarErrorType = result['calendar_error_type'] as String?;
+      }
 
       // Small delay between bookings for recurring sessions
       if (dates.length > 1) {
         await Future.delayed(const Duration(milliseconds: 100));
       }
     }
+
+    // Show calendar sync warning if there were any failures
+    if (hasCalendarSyncFailure && mounted) {
+      _showCalendarSyncWarning(calendarErrorMessage, calendarErrorType);
+    }
+  }
+
+  void _showCalendarSyncWarning(String? errorMessage, String? errorType) {
+    IconData icon;
+    Color iconColor;
+    String title;
+    String message;
+    String actionText;
+    VoidCallback? action;
+
+    // Customize message based on error type
+    switch (errorType) {
+      case 'quota':
+        icon = Icons.hourglass_empty;
+        iconColor = Colors.orange;
+        title = 'Calendar Sync Delayed';
+        message = errorMessage ?? 'API quota exceeded. Your booking is saved, but calendar sync will retry in 1 hour.';
+        actionText = 'OK';
+        action = null;
+        break;
+      case 'auth':
+        icon = Icons.login;
+        iconColor = Colors.blue;
+        title = 'Sign In Required';
+        message = errorMessage ?? 'Your booking is saved, but please sign in with Google to sync to calendar.';
+        actionText = 'Sign In';
+        action = () {
+          Navigator.pop(context);
+          // TODO: Trigger Google sign-in
+        };
+        break;
+      case 'permission':
+        icon = Icons.lock_outline;
+        iconColor = Colors.red;
+        title = 'Permission Needed';
+        message = errorMessage ?? 'Your booking is saved, but calendar permissions are required for sync.';
+        actionText = 'Grant Access';
+        action = () {
+          Navigator.pop(context);
+          // TODO: Trigger permission request
+        };
+        break;
+      default:
+        icon = Icons.cloud_off;
+        iconColor = Colors.orange;
+        title = 'Calendar Sync Failed';
+        message = errorMessage ?? 'Your booking is saved, but could not be synced to Google Calendar.';
+        actionText = 'OK';
+        action = null;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 48),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: TextStyle(color: Colors.grey.shade600),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                if (action != null)
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Later'),
+                  ),
+                ElevatedButton(
+                  onPressed: action ?? () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: iconColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: Text(actionText),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _showSuccessDialog() async {
@@ -1601,17 +1785,43 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () async {
+                // Close success dialog
+                Navigator.pop(context);
+
+                // Close booking screen
+                if (mounted) {
+                  Navigator.pop(context, true);
+
+                  // Navigate to Booking Management screen to show the newly booked session
+                  if (widget.trainerId != null) {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookingManagementScreen(
+                          trainerId: widget.trainerId!,
+                          initialTab: 1, // 1 = Upcoming tab (where new bookings appear)
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
-              child: const Text('Done'),
+              child: const Text('View Booking'),
             ),
           ],
         ),
       ),
     );
+
+    // ✅ FIX: Reset loading state after dialog closes
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _showErrorSnackbar(String message) {
@@ -1638,21 +1848,24 @@ class _BookingScreenEnhancedState extends State<BookingScreenEnhanced>
 
 // Business Logic Classes
 class BookingConstraints {
-  final int minAdvanceHours = 2;
-  final int maxAdvanceDays = 30;
+  final int minAdvanceHours = 0; // Allow booking today
+  final int maxAdvanceDays = 30; // Allow booking up to 30 days in advance
   final int bufferMinutes = 15;
-  
+
   void validateDate(DateTime date) {
     final now = DateTime.now();
-    final minTime = now.add(Duration(hours: minAdvanceHours));
-    final maxTime = now.add(Duration(days: maxAdvanceDays));
-    
-    if (date.isBefore(minTime)) {
-      throw BookingException('Please book at least $minAdvanceHours hours in advance');
+    final today = DateUtils.dateOnly(now);
+    final dateOnly = DateUtils.dateOnly(date);
+
+    // Block past dates
+    if (dateOnly.isBefore(today)) {
+      throw BookingException('Cannot book sessions in the past');
     }
-    
-    if (date.isAfter(maxTime)) {
-      throw BookingException('Cannot book more than $maxAdvanceDays days ahead');
+
+    // Allow advance booking up to maxAdvanceDays
+    final maxDate = today.add(Duration(days: maxAdvanceDays));
+    if (dateOnly.isAfter(maxDate)) {
+      throw BookingException('Cannot book more than $maxAdvanceDays days in advance');
     }
   }
   
@@ -1676,9 +1889,9 @@ class BookingConstraints {
     
     return BusinessHours(
       isWorkingDay: true,
-      startHour: 6,
+      startHour: 7, // 7 AM (changed from 6)
       startMinute: 0,
-      endHour: 21,
+      endHour: 22, // 10 PM (changed from 21)
       endMinute: 0,
     );
   }
@@ -1693,9 +1906,9 @@ class BusinessHours {
 
   BusinessHours({
     this.isWorkingDay = true,
-    this.startHour = 6,
+    this.startHour = 7, // 7 AM default
     this.startMinute = 0,
-    this.endHour = 21,
+    this.endHour = 22, // 10 PM default
     this.endMinute = 0,
   });
 }

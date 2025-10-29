@@ -1429,6 +1429,10 @@ class _TrainerDashboardEnhancedState extends State<TrainerDashboardEnhanced>
 
   Future<void> _handleSignOut() async {
     try {
+      // CRITICAL: Reset dashboard provider to clear all user data
+      debugPrint('🔒 Signing out - clearing user data');
+      context.read<DashboardProvider>().reset();
+
       await SupabaseService.instance.signOut();
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/login');

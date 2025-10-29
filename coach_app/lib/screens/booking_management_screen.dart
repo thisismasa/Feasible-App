@@ -7,10 +7,12 @@ import '../models/user_model.dart';
 /// Shows all upcoming sessions, today's schedule, and allows management
 class BookingManagementScreen extends StatefulWidget {
   final String trainerId;
+  final int initialTab; // 0=Today, 1=Upcoming, 2=Weekly, 3=History
 
   const BookingManagementScreen({
     Key? key,
     required this.trainerId,
+    this.initialTab = 0, // Default to Today tab
   }) : super(key: key);
 
   @override
@@ -23,13 +25,23 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
   List<Map<String, dynamic>> _todaySessions = [];
   List<Map<String, dynamic>> _upcomingSessions = [];
   List<Map<String, dynamic>> _weeklySessions = [];
+  List<Map<String, dynamic>> _historySessions = []; // ✅ Added for history
   bool _isLoading = true;
   String? _errorMessage;
+
+  // ✅ Added for history filtering
+  String _historyFilter = '1_day'; // '1_day', '1_week', '1_month', 'custom'
+  DateTime? _customStartDate;
+  DateTime? _customEndDate;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 4,
+      vsync: this,
+      initialIndex: widget.initialTab, // Use the initialTab parameter
+    );
     _loadData();
   }
 
@@ -58,10 +70,14 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
       // Load weekly calendar
       final weekly = await DatabaseService.instance.getWeeklyCalendar(widget.trainerId);
 
+      // ✅ Load history sessions (completed sessions)
+      final history = await _loadHistorySessions();
+
       setState(() {
         _todaySessions = today;
         _upcomingSessions = upcoming;
         _weeklySessions = weekly;
+        _historySessions = history;
         _isLoading = false;
       });
     } catch (e) {
@@ -69,6 +85,48 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
         _errorMessage = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  /// Load history sessions based on current filter
+  Future<List<Map<String, dynamic>>> _loadHistorySessions() async {
+    final now = DateTime.now();
+    DateTime startDate;
+    // ✅ FIX: Set endDate to end of today (23:59:59) to include all sessions today
+    DateTime endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    // Calculate date range based on filter
+    switch (_historyFilter) {
+      case '1_day':
+        // ✅ FIX: Last 24 hours from start of yesterday to end of today
+        startDate = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 1));
+        break;
+      case '1_week':
+        startDate = now.subtract(const Duration(days: 7));
+        break;
+      case '1_month':
+        startDate = DateTime(now.year, now.month - 1, now.day);
+        break;
+      case 'custom':
+        if (_customStartDate == null || _customEndDate == null) {
+          return [];
+        }
+        startDate = _customStartDate!;
+        endDate = _customEndDate!;
+        break;
+      default:
+        startDate = now.subtract(const Duration(days: 1));
+    }
+
+    try {
+      return await DatabaseService.instance.getCompletedSessions(
+        widget.trainerId,
+        startDate: startDate,
+        endDate: endDate,
+      );
+    } catch (e) {
+      debugPrint('Error loading history sessions: $e');
+      return [];
     }
   }
 
@@ -91,6 +149,10 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
             Tab(
               icon: const Icon(Icons.view_week),
               text: 'Weekly',
+            ),
+            Tab(
+              icon: const Icon(Icons.history),
+              text: 'History (${_historySessions.length})', // ✅ Added history tab
             ),
           ],
         ),
@@ -131,6 +193,7 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
                     _buildTodayView(),
                     _buildUpcomingView(),
                     _buildWeeklyView(),
+                    _buildHistoryView(), // ✅ Added history view
                   ],
                 ),
     );
@@ -343,9 +406,327 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
     );
   }
 
+  Widget _buildHistoryView() {
+    return Column(
+      children: [
+        // Filter selector
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.grey[100],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.filter_list, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Filter by:',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildFilterChip('Last 24 Hours', '1_day'),
+                  _buildFilterChip('Last 7 Days', '1_week'),
+                  _buildFilterChip('Last 30 Days', '1_month'),
+                  _buildFilterChip('Custom Range', 'custom'),
+                ],
+              ),
+              if (_historyFilter == 'custom') ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: _customStartDate ?? DateTime.now(),
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime.now(),
+                          );
+                          if (date != null) {
+                            setState(() => _customStartDate = date);
+                            _loadData();
+                          }
+                        },
+                        icon: const Icon(Icons.calendar_today, size: 16),
+                        label: Text(
+                          _customStartDate != null
+                              ? DateFormat('MMM d, yyyy').format(_customStartDate!)
+                              : 'Start Date',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('to'),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: _customEndDate ?? DateTime.now(),
+                            firstDate: _customStartDate ?? DateTime(2020),
+                            lastDate: DateTime.now(),
+                          );
+                          if (date != null) {
+                            setState(() => _customEndDate = date);
+                            _loadData();
+                          }
+                        },
+                        icon: const Icon(Icons.calendar_today, size: 16),
+                        label: Text(
+                          _customEndDate != null
+                              ? DateFormat('MMM d, yyyy').format(_customEndDate!)
+                              : 'End Date',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        // Sessions list
+        Expanded(
+          child: _historySessions.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.history, size: 64, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No completed sessions',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Sessions you complete will appear here',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _historySessions.length,
+                    itemBuilder: (context, index) {
+                      final session = _historySessions[index];
+                      return _buildHistorySessionCard(session);
+                    },
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _historyFilter == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _historyFilter = value;
+          });
+          _loadData();
+        }
+      },
+      selectedColor: Colors.blue[100],
+      checkmarkColor: Colors.blue[700],
+    );
+  }
+
+  Widget _buildHistorySessionCard(Map<String, dynamic> session) {
+    // ✅ FIXED: Add null safety for date parsing
+    final scheduledStart = DateTime.parse(session['scheduled_start'] ?? DateTime.now().toIso8601String());
+    final scheduledEnd = DateTime.parse(session['scheduled_end'] ?? DateTime.now().add(Duration(hours: 1)).toIso8601String());
+    final clientName = session['client_name'] ?? 'Unknown Client';
+    final packageName = session['package_name'] ?? 'Package';
+    final location = session['location'] ?? 'TBD';
+    final sessionType = session['session_type'] ?? 'in_person';
+    final completedAt = session['completed_at'] != null
+        ? DateTime.parse(session['completed_at'])
+        : scheduledEnd;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: () => _showSessionDetails(session),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row
+              Row(
+                children: [
+                  // Date & Time
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          DateFormat('MMM d').format(scheduledStart),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          DateFormat('HH:mm').format(scheduledStart),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Client info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.person, size: 16),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                clientName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              sessionType == 'online'
+                                  ? Icons.videocam
+                                  : Icons.location_on,
+                              size: 14,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                location,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Completed badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle, size: 12, color: Colors.white),
+                        SizedBox(width: 4),
+                        Text(
+                          'Completed',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Package and duration
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      packageName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.timer, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${session['duration_minutes']} min',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSessionCard(Map<String, dynamic> session, {bool showDate = true}) {
-    final scheduledStart = DateTime.parse(session['scheduled_start']);
-    final scheduledEnd = DateTime.parse(session['scheduled_end']);
+    // ✅ FIXED: Add null safety for date parsing
+    final scheduledStart = DateTime.parse(session['scheduled_start'] ?? DateTime.now().toIso8601String());
+    final scheduledEnd = DateTime.parse(session['scheduled_end'] ?? DateTime.now().add(Duration(hours: 1)).toIso8601String());
     final clientName = session['client_name'] ?? 'Unknown Client';
     final packageName = session['package_name'] ?? 'Package';
     final location = session['location'] ?? 'TBD';
@@ -560,7 +941,8 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
   }
 
   Widget _buildCompactSessionTile(Map<String, dynamic> session) {
-    final scheduledStart = DateTime.parse(session['scheduled_start']);
+    // ✅ FIXED: Add null safety for date parsing
+    final scheduledStart = DateTime.parse(session['scheduled_start'] ?? DateTime.now().toIso8601String());
     final clientName = session['client_name'] ?? 'Unknown';
     final sessionType = session['session_type'] ?? 'in_person';
 
@@ -602,8 +984,9 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
         maxChildSize: 0.9,
         expand: false,
         builder: (context, scrollController) {
-          final scheduledStart = DateTime.parse(session['scheduled_start']);
-          final scheduledEnd = DateTime.parse(session['scheduled_end']);
+          // ✅ FIXED: Add null safety for date parsing
+          final scheduledStart = DateTime.parse(session['scheduled_start'] ?? DateTime.now().toIso8601String());
+          final scheduledEnd = DateTime.parse(session['scheduled_end'] ?? DateTime.now().add(Duration(hours: 1)).toIso8601String());
 
           return SingleChildScrollView(
             controller: scrollController,
@@ -678,46 +1061,73 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
                     _buildDetailRow(
                       Icons.note,
                       'Notes',
-                      session['client_notes'],
+                      session['client_notes']?.toString() ?? '',  // ✅ FIXED: Ensure non-null String
                     ),
 
                   const SizedBox(height: 24),
 
-                  // Actions
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _confirmSession(session);
-                          },
-                          icon: const Icon(Icons.check_circle),
-                          label: const Text('Confirm'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                  // Actions (only show for non-completed sessions)
+                  if (session['status'] != 'completed') ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _confirmSession(session);
+                            },
+                            icon: const Icon(Icons.check_circle),
+                            label: const Text('Confirm'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _cancelSession(session);
-                          },
-                          icon: const Icon(Icons.cancel),
-                          label: const Text('Cancel'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _cancelSession(session);
+                            },
+                            icon: const Icon(Icons.cancel),
+                            label: const Text('Cancel'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+                  ] else ...[
+                    // For completed sessions, show status badge
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.green[200]!),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green[700], size: 24),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Session Completed',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -764,20 +1174,65 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
   }
 
   void _confirmSession(Map<String, dynamic> session) async {
+    // ✅ FIX: Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Confirming session...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
     try {
-      // Update session status to 'confirmed'
+      // ✅ FIX: Use 'id' field (not 'session_id') and change status to 'completed'
+      final sessionId = session['id'] ?? session['session_id'];
+
       await DatabaseService.instance.updateSessionStatus(
-        sessionId: session['session_id'],
-        status: 'confirmed',
+        sessionId: sessionId,
+        status: 'completed', // ✅ Changed from 'confirmed' to 'completed'
+        actualEndTime: DateTime.now(), // Mark when completed
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Session confirmed successfully')),
-      );
-      _loadData(); // Reload to show updated status
+
+      if (mounted) {
+        // ✅ FIX: Close loading dialog
+        Navigator.pop(context);
+
+        // Show success
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✓ Session completed successfully'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        // Reload data to remove completed session from list
+        await _loadData();
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error confirming session: $e')),
-      );
+      if (mounted) {
+        // ✅ FIX: Close loading dialog on error too
+        Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error confirming session: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -799,17 +1254,26 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
               Navigator.pop(context);
 
               try {
+                // ✅ FIXED: Use 'id' field with fallback (same as confirm method)
+                final sessionId = session['id'] ?? session['session_id'];
+
                 await DatabaseService.instance.cancelSessionSimple(
-                  session['session_id'],
+                  sessionId,
                   'Cancelled by trainer',
                 );
                 messenger.showSnackBar(
-                  const SnackBar(content: Text('Session cancelled successfully')),
+                  const SnackBar(
+                    content: Text('✓ Session cancelled successfully'),
+                    backgroundColor: Colors.orange,
+                  ),
                 );
                 _loadData();
               } catch (e) {
                 messenger.showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
+                  SnackBar(
+                    content: Text('Error cancelling session: $e'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               }
             },

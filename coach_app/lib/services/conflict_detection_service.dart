@@ -244,8 +244,8 @@ class ConflictDetectionService {
       );
 
       if (isAvailable) {
-        // Check if within business hours (6 AM - 9 PM)
-        if (currentTime.hour >= 6 && currentTime.hour < 21) {
+        // Check if within business hours (7 AM - 10 PM)
+        if (currentTime.hour >= 7 && currentTime.hour < 22) {
           return currentTime;
         }
       }

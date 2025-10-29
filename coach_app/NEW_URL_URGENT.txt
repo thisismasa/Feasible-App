@@ -1,0 +1,63 @@
+🔴 URGENT: NEW CLOUDFLARE URL 🔴
+
+========================================
+  OLD URL (DON'T USE THIS ANYMORE):
+========================================
+https://notes-injuries-comparing-programming.trycloudflare.com
+❌ This URL is DEAD (Error 1016)
+
+========================================
+  NEW URL (USE THIS ONE NOW):
+========================================
+https://chronic-speed-price-best.trycloudflare.com
+
+✅ Already in your clipboard! Just paste with Ctrl+V
+
+========================================
+  WHAT YOU NEED TO DO NOW:
+========================================
+
+1. Go back to the Google OAuth Client page:
+   https://console.cloud.google.com/apis/credentials/oauthclient/576001465184-pv04h51b3pl92hkdibgssabm2cegbq6r.apps.googleusercontent.com
+
+2. REMOVE the old URL if you already added it:
+   ❌ https://notes-injuries-comparing-programming.trycloudflare.com
+
+3. ADD the NEW URL in BOTH sections:
+
+   **Authorized JavaScript origins:**
+   - Click "+ ADD URI"
+   - Paste: https://chronic-speed-price-best.trycloudflare.com
+   - Press Tab
+
+   **Authorized redirect URIs:**
+   - Click "+ ADD URI"
+   - Paste: https://chronic-speed-price-best.trycloudflare.com
+   - Press Tab
+
+4. Click "SAVE" at bottom
+
+5. Wait 5 minutes
+
+6. Test the NEW URL!
+
+========================================
+  WHY DID THIS HAPPEN?
+========================================
+
+Free Cloudflare tunnels expire when disconnected.
+The old tunnel died, so we needed a NEW tunnel.
+New tunnel = NEW random URL.
+
+This is the LAST time! The Flutter server is now
+stable and running. The tunnel should stay up now.
+
+========================================
+  APP STATUS:
+========================================
+
+✅ Flutter Web Server: RUNNING on port 8080
+✅ Cloudflare Tunnel: ACTIVE
+✅ New URL: https://chronic-speed-price-best.trycloudflare.com
+
+Just update OAuth with the NEW URL and it will work!

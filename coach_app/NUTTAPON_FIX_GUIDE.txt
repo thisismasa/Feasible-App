@@ -1,0 +1,78 @@
+===============================================
+NUTTAPON BOOKING FIX - 2-STEP PROCESS
+===============================================
+
+ERROR: "Package not found or inactive"
+CLIENT: Nuttapon
+ISSUE: Has package but can't book
+
+===============================================
+STEP 1: DIAGNOSE (Find the problem)
+===============================================
+
+1. Supabase SQL Editor should be open
+2. Press Ctrl+V to paste diagnostic query
+3. Click RUN
+4. Look at the results to see what's wrong
+
+COMMON ISSUES TO LOOK FOR:
+- is_active = false (package inactive)
+- remaining_sessions = 0 or NULL (no sessions left)
+- expiry_date < today (package expired)
+- package_id = NULL (no package plan linked)
+- Package plan is_active = false (plan inactive)
+
+===============================================
+STEP 2: FIX (Apply automatic fix)
+===============================================
+
+After you see the problem:
+
+1. Open FIX_NUTTAPON_PACKAGE.sql
+2. Copy the content (or I'll copy it for you)
+3. Paste into Supabase SQL Editor
+4. Click RUN
+5. Check the verification results
+
+THE FIX WILL:
+✅ Activate Nuttapon's packages
+✅ Add remaining_sessions (10 or total)
+✅ Extend expiry_date by 90 days
+✅ Set start_date to today
+✅ Link to active package plan
+
+===============================================
+WHAT THE FIX DOES (5 Updates)
+===============================================
+
+UPDATE 1: Set is_active = true
+UPDATE 2: Set remaining_sessions = 10
+UPDATE 3: Extend expiry_date +90 days
+UPDATE 4: Set start_date = NOW()
+UPDATE 5: Link to active package plan
+
+===============================================
+AFTER RUNNING THE FIX
+===============================================
+
+You should see:
+✅ Package active: true
+✅ Remaining sessions: 10+
+✅ Expiry date: 90 days from now
+✅ Status: "✅ READY TO BOOK"
+
+Then Nuttapon can book immediately!
+
+===============================================
+QUICK COMMANDS
+===============================================
+
+For Step 1 (Diagnose):
+SQL: CHECK_NUTTAPON_BOOKING.sql (already copied!)
+
+For Step 2 (Fix):
+SQL: FIX_NUTTAPON_PACKAGE.sql (I'll copy it next)
+
+===============================================
+
+Press any key to continue to Step 2 (copy the fix)...

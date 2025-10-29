@@ -624,6 +624,24 @@ class DatabaseService {
     }
   }
 
+  /// Get completed sessions for a trainer within date range
+  Future<List<Map<String, dynamic>>> getCompletedSessions(
+    String trainerId, {
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    if (_isRealMode) {
+      return await _realService.getCompletedSessions(
+        trainerId,
+        startDate: startDate,
+        endDate: endDate,
+      );
+    } else {
+      debugPrint('📱 Demo: Getting completed sessions');
+      return [];
+    }
+  }
+
   /// Cancel a session with reason (simple version for booking management)
   Future<void> cancelSessionSimple(String sessionId, String reason) async {
     if (_isRealMode) {

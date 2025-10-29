@@ -1,0 +1,164 @@
+===============================================
+DELETE THESE QUERIES FROM SUPABASE DASHBOARD
+===============================================
+
+Total to delete: ~70-80 queries out of 133
+
+SEARCH FOR THESE PATTERNS AND DELETE ALL:
+=========================================
+
+Pattern 1: "FIX_" (Delete ALL - ~20 queries)
+---------------------------------------------
+❌ FIX_ALL_DATABASE_ISSUES
+❌ FIX_DATABASE_COMPLETE
+❌ FIX_SUPABASE_SECURITY_ISSUES
+❌ FIX_CLIENT_PACKAGES_SCHEMA
+❌ FIX_MISSING_COLUMN
+❌ FIX_PHOTO_URL_COLUMN
+❌ FIX_INFINITE_RECURSION_RLS
+❌ FIX_RLS_USERS_ONLY
+❌ FIX_TRAINER_CLIENTS_DUPLICATES
+❌ FIX_PACKAGE_BOOKING_SYNC
+❌ FIX_PACKAGE_ASSIGNMENT_BUG
+❌ FIX_OCT27_BOOKINGS
+❌ FIXED_CONFIRM_EMAIL
+❌ FIX_ALL_CLIENTS_WITHOUT_PACKAGES
+
+Pattern 2: "CHECK_" or "VERIFY_" (Delete ALL - ~8 queries)
+------------------------------------------------------------
+❌ CHECK_SCHEMA_FIRST
+❌ CHECK_CLIENTS_DATA
+❌ CHECK_KHUN_BIE
+❌ VERIFY_EXISTING_USER
+❌ VERIFY_PACKAGE_FIX
+❌ Any other CHECK_* or VERIFY_*
+
+Pattern 3: "DELETE_" (Delete ALL - DANGEROUS! - ~4 queries)
+-------------------------------------------------------------
+❌ DELETE_USER_AND_START_FRESH
+❌ DELETE_TEST_USERS
+❌ DELETE_ALL_TRAINER_CLIENTS
+❌ Any other DELETE_*
+
+Pattern 4: "ULTIMATE_" or "OLD_" (Delete ALL - ~3 queries)
+------------------------------------------------------------
+❌ ULTIMATE_FIX_ALL_61_ISSUES
+❌ ULTIMATE_FIX_CORRECT_COLUMNS
+❌ Any with "OLD_" in name
+
+Pattern 5: Temporary/Test (Delete ALL - ~10 queries)
+------------------------------------------------------
+❌ DIAGNOSE_AND_FIX_ALL
+❌ COPY_THIS_SQL
+❌ ASSIGN_KHUN_BIE_PACKAGE
+❌ GENERATE_INVITE_CODES
+❌ COMPREHENSIVE_END_TO_END_TEST
+❌ DATABASE_HEALTH_CHECK
+❌ AUTO_ASSIGN_PACKAGE_TRIGGER (if not using)
+❌ CLEAN_STORAGE_POLICIES
+
+Pattern 6: Dangerous Security (Delete ALL - ~3 queries)
+---------------------------------------------------------
+❌ DISABLE_RLS_TEMPORARILY
+❌ FORCE_REMOVE_ALL_POLICIES
+❌ FORCE_CONFIRM_EMAIL
+
+Pattern 7: Old Migrations (Delete THESE ONLY - ~3 queries)
+------------------------------------------------------------
+❌ 001_enterprise_client_schema
+❌ 002_complete_enterprise_schema_sync
+❌ 003_booking_integration_fix
+
+(Keep: 004, 005, 006)
+
+Pattern 8: Duplicates (Check if you have multiples)
+-----------------------------------------------------
+❌ Keep only ONE of:
+  - Calendar sync queries (keep latest)
+  - Package booking sync (keep latest)
+  - Email confirmation (delete all, use dashboard setting)
+
+===============================================
+KEEP THESE (DO NOT DELETE!)
+===============================================
+
+✅ FINAL_FIX_ALL_ISSUES - NEWEST FIX!
+✅ supabase_schema
+✅ 004_booking_integration_final
+✅ INSERT_PACKAGES
+✅ COMPLETE_USER_SETUP
+✅ CREATE_TRAINER_USER
+✅ supabase_storage_setup
+✅ supabase_booking_function
+✅ CALENDAR_SYNC_ENHANCED
+✅ 005_add_trainer_clients_table
+✅ 006_add_amount_paid_column
+
+===============================================
+HOW TO DELETE IN SUPABASE
+===============================================
+
+1. Go to SQL Editor: https://supabase.com/dashboard/project/dkdnpceoanwbeulhkvdh/sql
+2. Click PRIVATE (133) to expand
+3. For each query to delete:
+   - Hover over the query name
+   - Click the 3-dot menu (⋮)
+   - Click "Delete"
+   - Confirm
+
+4. Start with these easy ones:
+   - All "FIX_*" queries
+   - All "CHECK_*" queries
+   - All "DELETE_*" queries
+   - All "VERIFY_*" queries
+
+5. After deleting, you should have ~50-60 queries left
+
+===============================================
+QUICK DECISION GUIDE
+===============================================
+
+If query name contains:
+- FIX_ → DELETE
+- CHECK_ → DELETE
+- VERIFY_ → DELETE
+- DELETE_ → DELETE
+- ULTIMATE_ → DELETE
+- OLD_ → DELETE
+- TEMP_ → DELETE
+- DIAGNOSE_ → DELETE
+- FORCE_ → DELETE
+- DISABLE_ → DELETE
+
+If query is about:
+- Oct 27 booking → DELETE (already fixed)
+- Khun Bie → DELETE (one-time user fix)
+- Email confirmation → DELETE (use dashboard setting)
+- Duplicate columns → DELETE (already fixed)
+- RLS issues → DELETE (already fixed)
+
+If query is:
+- FINAL_FIX_ALL_ISSUES → KEEP!
+- Migration 004/005/006 → KEEP!
+- supabase_schema → KEEP!
+- Calendar/Booking features → KEEP!
+
+===============================================
+RESULT AFTER CLEANUP
+===============================================
+
+Before: 133 queries
+After:  ~50-60 queries
+
+You'll remove:
+- 70-80 old/duplicate/temporary queries
+- All dangerous deletion scripts
+- All one-time fixes
+
+You'll keep:
+- Current production schema
+- Active features
+- Latest fixes
+- Necessary migrations
+
+===============================================

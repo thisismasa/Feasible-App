@@ -20,6 +20,101 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
+  <!-- Google Sign-In / Calendar Integration -->
+  <!-- OAuth Client ID from Google Cloud Console -->
+  <meta name="google-signin-client_id" content="576001465184-pv04h51b3pl92hkdibgssabm2cegbq6r.apps.googleusercontent.com">
+
+  <!-- Google Calendar API Key and Initialization -->
+  <script>
+    // Google Calendar API Key
+    window.GOOGLE_API_KEY = 'AIzaSyDCjQsRx8tMpvu9bQVgMr3ezc_K1Ru6jFk';
+    window.calendarApiReady = false;
+    window.currentAccessToken = null;
+
+    // Initialize Google API when loaded
+    function gapiLoaded() {
+      gapi.load('client', function() {
+        gapi.client.init({
+          apiKey: window.GOOGLE_API_KEY,
+          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest']
+        }).then(function() {
+          console.log('✅ Google Calendar API initialized with API key');
+          window.calendarApiReady = true;
+        }, function(error) {
+          console.error('❌ Failed to initialize Google Calendar API:', error);
+          window.calendarApiReady = false;
+        });
+      });
+    }
+
+    // Set OAuth access token for calendar API
+    function setCalendarAccessToken(accessToken) {
+      try {
+        console.log('📅 Setting access token for gapi.client...');
+        window.currentAccessToken = accessToken;
+        gapi.client.setToken({ access_token: accessToken });
+        console.log('✅ Access token set successfully');
+        return true;
+      } catch (error) {
+        console.error('❌ Failed to set access token:', error);
+        return false;
+      }
+    }
+
+    // Create Google Calendar event
+    async function createCalendarEvent(eventData) {
+      try {
+        console.log('📅 Creating calendar event:', eventData);
+
+        if (!window.calendarApiReady) {
+          throw new Error('Calendar API not ready');
+        }
+
+        if (!window.currentAccessToken) {
+          throw new Error('No access token set');
+        }
+
+        // Ensure we have the calendar API loaded
+        if (!gapi.client.calendar) {
+          throw new Error('Calendar API not loaded');
+        }
+
+        // Create the event
+        const request = await gapi.client.calendar.events.insert({
+          calendarId: 'primary',
+          resource: eventData,
+          sendUpdates: eventData.attendees && eventData.attendees.length > 0 ? 'all' : 'none'
+        });
+
+        const response = await request;
+
+        if (response && response.result && response.result.id) {
+          console.log('✅ Calendar event created:', response.result.id);
+          console.log('   Link:', response.result.htmlLink);
+          return response.result.id;
+        } else {
+          console.error('❌ No event ID returned');
+          return null;
+        }
+      } catch (error) {
+        console.error('❌ Failed to create calendar event:', error);
+        console.error('   Error details:', error.result ? error.result.error : error);
+        return null;
+      }
+    }
+
+    // Check if calendar API is ready
+    function isCalendarApiReady() {
+      return window.calendarApiReady === true &&
+             gapi && gapi.client && gapi.client.calendar;
+    }
+  </script>
+  <!-- Google API JavaScript library -->
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+
+  <!-- Google Identity Services (for Sign-In) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">

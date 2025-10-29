@@ -1,0 +1,37 @@
+COPY THIS URL (already in clipboard):
+https://notes-injuries-comparing-programming.trycloudflare.com
+
+STEP-BY-STEP IN OAUTH CLIENT PAGE:
+
+1. Scroll down to "Authorized JavaScript origins"
+
+2. Click the "+ ADD URI" button
+
+3. Paste (Ctrl+V) the URL
+
+4. Press Tab key
+
+5. Keep scrolling to "Authorized redirect URIs"
+
+6. Click the "+ ADD URI" button again
+
+7. Paste (Ctrl+V) the same URL
+
+8. Press Tab key
+
+9. Scroll all the way to the bottom
+
+10. Click the "SAVE" button (blue button)
+
+11. Wait for "OAuth 2.0 Client updated" message
+
+12. Wait 5 minutes for Google to propagate
+
+13. Then test sign-in!
+
+IMPORTANT:
+- Add to BOTH sections
+- No spaces before or after URL
+- Press Tab after pasting (not Enter or Space)
+- Must click SAVE at bottom
+- Must wait 5 minutes after saving

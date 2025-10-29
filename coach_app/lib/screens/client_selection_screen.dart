@@ -21,7 +21,7 @@ class ClientSelectionScreen extends StatefulWidget {
   State<ClientSelectionScreen> createState() => _ClientSelectionScreenState();
 }
 
-class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
+class _ClientSelectionScreenState extends State<ClientSelectionScreen> with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   List<UserModel> _allClients = [];
   List<UserModel> _filteredClients = [];
@@ -32,13 +32,24 @@ class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     debugPrint('📱 ClientSelectionScreen: Loading clients (mode: ${widget.mode}, onlyActive: ${widget.onlyActiveClients})');
     _loadClients();
     _searchController.addListener(_filterClients);
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && mounted) {
+      debugPrint('🔄 App resumed - refreshing client list');
+      _loadClients();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
@@ -108,23 +119,28 @@ class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
           status: 'active',
         );
 
+        debugPrint('📦 Loading package for ${client.name} (${client.id}): ${packages.length} packages found');
+
         if (packages.isNotEmpty) {
           final packageData = packages.first;
           final remainingSessions = packageData['sessions_remaining'] ?? packageData['remaining_sessions'] ?? 0;
+
+          debugPrint('   Package: ${packageData['package_name']}, Remaining: $remainingSessions');
+          debugPrint('   Raw data: $packageData');
 
           if (remainingSessions > 0) {
             _clientPackages[client.id] = ClientPackage.fromSupabaseMap(packageData);
           } else {
             _clientPackages[client.id] = null;
-            debugPrint('⚠️ Client ${client.id} has package with 0 remaining sessions');
+            debugPrint('⚠️ Client ${client.name} has package with 0 remaining sessions');
           }
         } else {
           _clientPackages[client.id] = null;
-          debugPrint('⚠️ Client ${client.id} has no active packages');
+          debugPrint('⚠️ Client ${client.name} (${client.id}) has no active packages');
         }
       } catch (e) {
         _clientPackages[client.id] = null;
-        debugPrint('❌ Error loading package for ${client.id}: $e');
+        debugPrint('❌ Error loading package for ${client.name}: $e');
       }
     }
 
@@ -208,7 +224,12 @@ class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
     return Column(
       children: [
         _buildSearchBar(),
-        Expanded(child: _buildClientList()),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadClients,
+            child: _buildClientList(),
+          ),
+        ),
       ],
     );
   }
@@ -442,6 +463,9 @@ class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
   }
 
   void _selectClient(UserModel client, ClientPackage? package) async {
+    debugPrint('👤 CLIENT SELECTED: ${client.name} (ID: ${client.id})');
+    debugPrint('📦 Package status: ${package != null ? "Has package (${package.remainingSessions} sessions)" : "No package"}');
+
     if (widget.mode == SelectionMode.booking && package == null) {
       // Show package purchase prompt
       final shouldPurchase = await showDialog<bool>(
@@ -475,6 +499,12 @@ class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
 
         // If package was purchased, reload and try again
         if (packagePurchased == true && mounted) {
+          debugPrint('🔄 Package purchased! Reloading client data...');
+
+          // Small delay to ensure database has been updated
+          await Future.delayed(const Duration(milliseconds: 500));
+
+          // Force reload all clients and packages
           await _loadClients();
 
           // Get the updated package
@@ -482,6 +512,8 @@ class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
             clientId: client.id,
             status: 'active',
           );
+
+          debugPrint('📦 Updated packages for ${client.name}: ${updatedPackages.length} found');
 
           if (updatedPackages.isNotEmpty && mounted) {
             final newPackage = ClientPackage.fromSupabaseMap(updatedPackages.first);
@@ -495,6 +527,14 @@ class _ClientSelectionScreenState extends State<ClientSelectionScreen> {
 
             // Now return to booking with the new package
             Navigator.pop(context, {'client': client, 'package': newPackage});
+          } else {
+            debugPrint('⚠️ No packages found after reload - staying on selection screen');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Package purchased! Pull down to refresh the list.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
           }
         }
       }

@@ -1,0 +1,43 @@
+CURRENT CLOUDFLARE URL - ADD THIS TO OAUTH:
+
+https://notes-injuries-comparing-programming.trycloudflare.com
+
+========================================
+IMPORTANT: This URL changed!
+========================================
+
+Old URL (no longer works):
+https://tones-dancing-patches-searching.trycloudflare.com
+
+New URL (current, use this one):
+https://notes-injuries-comparing-programming.trycloudflare.com
+
+========================================
+Where to Add This URL
+========================================
+
+Open this page:
+https://console.cloud.google.com/apis/credentials/oauthclient/576001465184-pv04h51b3pl92hkdibgssabm2cegbq6r.apps.googleusercontent.com
+
+Add to BOTH sections:
+
+1. Authorized JavaScript origins:
+   - Click "+ ADD URI"
+   - Paste: https://notes-injuries-comparing-programming.trycloudflare.com
+   - Press Tab (NOT Enter or Space)
+
+2. Authorized redirect URIs:
+   - Click "+ ADD URI"
+   - Paste: https://notes-injuries-comparing-programming.trycloudflare.com
+   - Press Tab (NOT Enter or Space)
+
+3. Scroll to bottom → Click "SAVE"
+
+4. Wait 5 minutes
+
+5. Test again!
+
+========================================
+URL is already in your clipboard!
+========================================
+Just paste with Ctrl+V in the OAuth client page.

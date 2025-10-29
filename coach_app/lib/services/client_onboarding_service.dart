@@ -236,27 +236,86 @@ class ClientOnboardingService {
     OnboardingRequest request,
     String? paymentTransactionId,
   ) async {
+    // IMPORTANT: Always assign a package, even if none selected
+    String? packageId = request.selectedPackageId;
+    String packageName = 'No Package';
+    int totalSessions = 0;
+    double amountPaid = 0;
+
+    // If no package selected, create/find default "No Package"
+    if (packageId == null || packageId.isEmpty) {
+      // Find or create "No Package"
+      final noPackageQuery = await SupabaseService.instance.client
+          .from('packages')
+          .select()
+          .eq('name', 'No Package')
+          .limit(1);
+
+      if (noPackageQuery.isEmpty) {
+        // Create "No Package" if it doesn't exist
+        final newPackage = await SupabaseService.instance.client
+            .from('packages')
+            .insert({
+              'name': 'No Package',
+              'description': 'Default package - Please assign a real package',
+              'session_count': 0,
+              'price': 0,
+              'validity_days': 30,
+              'is_active': true,
+              'created_at': DateTime.now().toIso8601String(),
+              'updated_at': DateTime.now().toIso8601String(),
+            })
+            .select()
+            .single();
+
+        packageId = newPackage['id'];
+      } else {
+        packageId = noPackageQuery.first['id'];
+      }
+
+      packageName = 'No Package';
+      totalSessions = 0;
+      amountPaid = 0;
+    } else {
+      // Get package details
+      final packageData = await SupabaseService.instance.client
+          .from('packages')
+          .select()
+          .eq('id', packageId)
+          .single();
+
+      packageName = packageData['name'] ?? 'Package';
+      totalSessions = packageData['session_count'] ?? 10;
+      amountPaid = request.getAmount();
+    }
+
     final response = await SupabaseService.instance.client
         .from('client_packages')
         .insert({
           'client_id': userId,
-          'package_id': request.selectedPackageId,
+          'package_id': packageId,
+          'package_name': packageName,
           'purchase_date': request.packageStartDate.toIso8601String(),
           'expiry_date': request.packageStartDate
               .add(Duration(days: 90)) // Assuming 90 days validity
               .toIso8601String(),
-          'total_sessions': 10, // Get from package
-          'sessions_used': 0,
+          'total_sessions': totalSessions,
+          'remaining_sessions': totalSessions,
+          'used_sessions': 0,
+          'sessions_scheduled': 0,
           'status': 'active',
-          'payment_method': request.paymentMethod,
-          'payment_transaction_id': paymentTransactionId,
-          'amount_paid': request.getAmount(),
-          'is_prorated': request.useProrating && request.packageStartDate.day > 1,
+          'payment_method': request.paymentMethod ?? 'none',
+          'payment_status': packageId != null && amountPaid > 0 ? 'paid' : 'pending',
+          'amount_paid': amountPaid,
+          'price_paid': amountPaid,
+          'is_active': true,
+          'is_subscription': false,
           'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
         })
         .select()
         .single();
-    
+
     return response['id'];
   }
 

@@ -1,0 +1,9 @@
+# Database Configuration
+# Copy this file to db-config.txt and fill in your password
+
+# Get your password from:
+# 1. Go to: https://supabase.com/dashboard/project/dkdnpceoanwbeulhkvdh/settings/database
+# 2. Scroll to "Connection string"
+# 3. Copy the password
+
+DATABASE_URL=postgresql://postgres.dkdnpceoanwbeulhkvdh:[YOUR-PASSWORD-HERE]@aws-0-us-west-1.pooler.supabase.com:5432/postgres

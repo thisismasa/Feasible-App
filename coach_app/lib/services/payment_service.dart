@@ -135,10 +135,10 @@ class PaymentService {
         'trainer_id': trainerId,
         'package_id': package.id,
         'package_name': package.name,
-        // sessions_remaining is auto-calculated by database: total_sessions - sessions_used
-        'sessions_used': 0,
+        'used_sessions': 0, // ✅ FIXED: Use 'used_sessions' (real column), not 'sessions_used' (generated alias)
         'sessions_scheduled': 0,
         'total_sessions': package.sessionCount,
+        'remaining_sessions': package.sessionCount, // ✅ FIXED: Must set explicitly! Default is 0, not auto-calculated
         'price_paid': package.price,
         'amount_paid': package.price, // Add amount_paid field
         'payment_method': paymentMethod,

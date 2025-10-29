@@ -1,6 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show DateUtils;
+import 'package:intl/intl.dart';
 import '../config/supabase_config.dart';
 import '../models/user_model.dart';
 import 'google_calendar_service.dart';
@@ -449,55 +451,106 @@ class RealSupabaseService {
       final result = response as Map<String, dynamic>;
 
       if (result['success'] == true) {
-        debugPrint('✓ Session booked successfully');
+        debugPrint('✅ Session booked successfully: ${result['session_id']}');
 
-        // Sync to Google Calendar (non-critical operation, mobile only)
-        if (!kIsWeb) {
-          try {
-            debugPrint('📅 Syncing to Google Calendar...');
+        // GOOGLE CALENDAR SYNC - Universal (works on web & mobile)
+        try {
+          debugPrint('📅 Attempting Google Calendar sync...');
 
-            // Get client info for calendar event
-            final clientResponse = await _supabase
-              .from('users')
-              .select('full_name, email')
-              .eq('id', clientId)
-              .maybeSingle()
-              .timeout(_defaultTimeout);
+          // Get client info for calendar event
+          final clientResponse = await _supabase
+            .from('users')
+            .select('full_name, email')
+            .eq('id', clientId)
+            .maybeSingle()
+            .timeout(_defaultTimeout);
 
-            if (clientResponse != null) {
-              final clientName = clientResponse['full_name'] ?? 'Client';
-              final clientEmail = clientResponse['email'];
+          if (clientResponse != null) {
+            final clientName = clientResponse['full_name'] ?? 'Client';
+            final clientEmail = clientResponse['email'];
 
-              // Create Google Calendar event
-              final eventId = await GoogleCalendarService.instance.createEvent(
-                summary: 'Training Session - $clientName',
-                startTime: scheduledDate,
-                endTime: scheduledDate.add(Duration(minutes: durationMinutes)),
-                clientName: clientName,
-                clientEmail: clientEmail,
-                location: location,
-                description: notes,
-              );
+            // Create Google Calendar event (works on both web and mobile)
+            final eventId = await GoogleCalendarService.instance.createEvent(
+              summary: 'PT Session - $clientName',
+              startTime: scheduledDate,
+              endTime: scheduledDate.add(Duration(minutes: durationMinutes)),
+              clientName: clientName,
+              clientEmail: clientEmail,
+              location: location,
+              description: notes ?? 'Personal training session',
+            );
 
-              // Store event ID in database if successful
-              if (eventId != null && result['session_id'] != null) {
-                await _supabase
-                  .from('sessions')
-                  .update({'google_calendar_event_id': eventId})
-                  .eq('id', result['session_id'])
-                  .timeout(_defaultTimeout);
+            // Store event ID in database if successful
+            if (eventId != null && result['session_id'] != null) {
+              await _supabase
+                .from('sessions')
+                .update({'google_calendar_event_id': eventId})
+                .eq('id', result['session_id'])
+                .timeout(_defaultTimeout);
 
-                debugPrint('✅ Synced to Google Calendar: $eventId');
-                result['google_calendar_event_id'] = eventId;
-              }
+              debugPrint('✅ Synced to Google Calendar: $eventId');
+              debugPrint('   Session will appear in trainer\'s Google Calendar');
+              result['google_calendar_event_id'] = eventId;
+              result['calendar_synced'] = true;
+            } else {
+              debugPrint('⚠️ Calendar event created but ID not returned');
+              result['calendar_synced'] = false;
             }
-          } catch (e) {
-            debugPrint('⚠️ Google Calendar sync skipped: ${e.toString().split('\n').first}');
-            // Don't fail the booking if calendar sync fails
+          } else {
+            debugPrint('⚠️ Client info not found for calendar sync');
+            result['calendar_synced'] = false;
           }
+        } on CalendarQuotaExceededException catch (e) {
+          debugPrint('⚠️ Google Calendar API quota exceeded: ${e.message}');
+          result['calendar_synced'] = false;
+          result['calendar_error'] = 'API quota exceeded. Try again in 1 hour.';
+          result['calendar_error_type'] = 'quota';
+          // Don't fail the booking if calendar sync fails
+        } on CalendarAuthException catch (e) {
+          debugPrint('⚠️ Google Calendar authentication failed: ${e.message}');
+          result['calendar_synced'] = false;
+          result['calendar_error'] = 'Google Calendar authentication expired. Please sign in again.';
+          result['calendar_error_type'] = 'auth';
+          // Don't fail the booking if calendar sync fails
+        } on CalendarPermissionException catch (e) {
+          debugPrint('⚠️ Google Calendar permission denied: ${e.message}');
+          result['calendar_synced'] = false;
+          result['calendar_error'] = 'No permission to access Google Calendar. Please grant access.';
+          result['calendar_error_type'] = 'permission';
+          // Don't fail the booking if calendar sync fails
+        } on CalendarException catch (e) {
+          debugPrint('⚠️ Google Calendar error: ${e.message}');
+          result['calendar_synced'] = false;
+          result['calendar_error'] = e.message;
+          result['calendar_error_type'] = 'calendar';
+          // Don't fail the booking if calendar sync fails
+        } catch (e) {
+          final errorMsg = e.toString().split('\n').first;
+          debugPrint('⚠️ Google Calendar sync failed (non-critical): $errorMsg');
+
+          // Provide helpful error messages
+          if (errorMsg.contains('ClientID not set') || errorMsg.contains('OAuth')) {
+            debugPrint('💡 To enable Google Calendar on web:');
+            debugPrint('   1. Get OAuth Client ID from Google Cloud Console');
+            debugPrint('   2. Add to web/index.html: <meta name="google-signin-client_id" content="YOUR_CLIENT_ID"/>');
+          } else if (errorMsg.contains('not initialized')) {
+            debugPrint('💡 Google Calendar not initialized - user may need to sign in to Google');
+          }
+
+          result['calendar_synced'] = false;
+          result['calendar_error'] = errorMsg;
+          result['calendar_error_type'] = 'unknown';
+          // Don't fail the booking if calendar sync fails
         }
       } else {
-        debugPrint('❌ Booking failed: ${result['error']}');
+        // ✅ FIXED: Database returns 'errors' (plural array), not 'error' (singular)
+        final errors = result['errors'] as List?;
+        final errorMessage = errors != null && errors.isNotEmpty ? errors.join(', ') : 'Unknown error';
+        debugPrint('❌ Booking failed: $errorMessage');
+
+        // Add formatted error message for UI
+        result['error'] = errorMessage;
+        result['message'] = errorMessage;
       }
 
       return result;
@@ -663,6 +716,31 @@ class RealSupabaseService {
     String? notes,
   }) async {
     try {
+      // ✅ VALIDATION: Block completing sessions that are not scheduled for TODAY
+      if (status == 'completed') {
+        // Fetch the session to check its scheduled date
+        final sessionData = await _supabase
+            .from('sessions')
+            .select('scheduled_start')
+            .eq('id', sessionId)
+            .single()
+            .timeout(_defaultTimeout);
+
+        if (sessionData != null && sessionData['scheduled_start'] != null) {
+          final scheduledStart = DateTime.parse(sessionData['scheduled_start']);
+          final scheduledDate = DateUtils.dateOnly(scheduledStart);
+          final today = DateUtils.dateOnly(DateTime.now());
+
+          // Only allow completing sessions scheduled for TODAY
+          if (!scheduledDate.isAtSameMomentAs(today)) {
+            final dateStr = DateFormat('MMM dd, yyyy').format(scheduledDate);
+            throw Exception(
+              'Cannot complete session in advance. This session is scheduled for $dateStr. You can only complete sessions on the same day they are scheduled.'
+            );
+          }
+        }
+      }
+
       final updates = <String, dynamic>{
         'status': status,
         'updated_at': DateTime.now().toIso8601String(),
@@ -929,14 +1007,47 @@ class RealSupabaseService {
   /// Get today's scheduled sessions for a trainer
   Future<List<Map<String, dynamic>>> getTodaySchedule(String trainerId) async {
     try {
+      // Get today's date range
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
       final response = await _supabase
-          .from('today_schedule')
-          .select()
+          .from('sessions')
+          .select('''
+            *,
+            client:users!sessions_client_id_fkey(
+              id,
+              full_name,
+              email
+            ),
+            package:client_packages(
+              id,
+              package_name,
+              remaining_sessions
+            )
+          ''')
           .eq('trainer_id', trainerId)
+          .inFilter('status', ['scheduled', 'confirmed']) // ✅ EXCLUDE completed sessions
+          .gte('scheduled_start', startOfDay.toIso8601String())
+          .lt('scheduled_start', endOfDay.toIso8601String())
           .order('scheduled_start')
           .timeout(_defaultTimeout);
 
-      return List<Map<String, dynamic>>.from(response as List);
+      // Transform nested objects to flat structure
+      final sessions = List<Map<String, dynamic>>.from(response as List);
+      return sessions.map((session) {
+        final client = session['client'];
+        final package = session['package'];
+
+        return {
+          ...session,
+          'client_name': client != null ? client['full_name'] ?? 'Unknown' : 'Unknown',
+          'client_email': client != null ? client['email'] : null,
+          'package_name': package != null ? package['package_name'] ?? 'Package' : 'Package',
+          'remaining_sessions': package != null ? package['remaining_sessions'] : null,
+        };
+      }).toList();
     } catch (e) {
       debugPrint('❌ Error getting today schedule: $e');
       rethrow;
@@ -949,14 +1060,44 @@ class RealSupabaseService {
     int limit = 50,
   }) async {
     try {
+      final now = DateTime.now();
+
       final response = await _supabase
-          .from('trainer_upcoming_sessions')
-          .select()
+          .from('sessions')
+          .select('''
+            *,
+            client:users!sessions_client_id_fkey(
+              id,
+              full_name,
+              email
+            ),
+            package:client_packages(
+              id,
+              package_name,
+              remaining_sessions
+            )
+          ''')
           .eq('trainer_id', trainerId)
+          .inFilter('status', ['scheduled', 'confirmed']) // ✅ EXCLUDE completed sessions
+          .gte('scheduled_start', now.toIso8601String())
+          .order('scheduled_start')
           .limit(limit)
           .timeout(_defaultTimeout);
 
-      return List<Map<String, dynamic>>.from(response as List);
+      // Transform nested objects to flat structure
+      final sessions = List<Map<String, dynamic>>.from(response as List);
+      return sessions.map((session) {
+        final client = session['client'];
+        final package = session['package'];
+
+        return {
+          ...session,
+          'client_name': client != null ? client['full_name'] ?? 'Unknown' : 'Unknown',
+          'client_email': client != null ? client['email'] : null,
+          'package_name': package != null ? package['package_name'] ?? 'Package' : 'Package',
+          'remaining_sessions': package != null ? package['remaining_sessions'] : null,
+        };
+      }).toList();
     } catch (e) {
       debugPrint('❌ Error getting upcoming sessions: $e');
       rethrow;
@@ -966,15 +1107,99 @@ class RealSupabaseService {
   /// Get weekly calendar view for a trainer
   Future<List<Map<String, dynamic>>> getWeeklyCalendar(String trainerId) async {
     try {
+      // Get current week's date range (next 7 days)
+      final now = DateTime.now();
+      final startOfWeek = DateTime(now.year, now.month, now.day);
+      final endOfWeek = startOfWeek.add(const Duration(days: 7));
+
       final response = await _supabase
-          .from('weekly_calendar')
-          .select()
+          .from('sessions')
+          .select('''
+            *,
+            client:users!sessions_client_id_fkey(
+              id,
+              full_name,
+              email
+            ),
+            package:client_packages(
+              id,
+              package_name,
+              remaining_sessions
+            )
+          ''')
           .eq('trainer_id', trainerId)
+          .inFilter('status', ['scheduled', 'confirmed']) // ✅ EXCLUDE completed sessions
+          .gte('scheduled_start', startOfWeek.toIso8601String())
+          .lt('scheduled_start', endOfWeek.toIso8601String())
+          .order('scheduled_start')
           .timeout(_defaultTimeout);
 
-      return List<Map<String, dynamic>>.from(response as List);
+      // Transform nested objects to flat structure
+      final sessions = List<Map<String, dynamic>>.from(response as List);
+      return sessions.map((session) {
+        final client = session['client'];
+        final package = session['package'];
+
+        return {
+          ...session,
+          'client_name': client != null ? client['full_name'] ?? 'Unknown' : 'Unknown',
+          'client_email': client != null ? client['email'] : null,
+          'package_name': package != null ? package['package_name'] ?? 'Package' : 'Package',
+          'remaining_sessions': package != null ? package['remaining_sessions'] : null,
+        };
+      }).toList();
     } catch (e) {
       debugPrint('❌ Error getting weekly calendar: $e');
+      rethrow;
+    }
+  }
+
+  /// Get completed sessions for a trainer within date range
+  Future<List<Map<String, dynamic>>> getCompletedSessions(
+    String trainerId, {
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('sessions')
+          .select('''
+            *,
+            client:users!sessions_client_id_fkey(
+              id,
+              full_name,
+              email
+            ),
+            package:client_packages(
+              id,
+              package_name,
+              remaining_sessions
+            )
+          ''')
+          .eq('trainer_id', trainerId)
+          // ✅ FIX: Show ALL past sessions regardless of status
+          // Removed .eq('status', 'completed') to show scheduled, confirmed, completed, and cancelled sessions
+          .gte('scheduled_start', startDate.toIso8601String())
+          .lte('scheduled_start', endDate.toIso8601String())
+          .order('scheduled_start', ascending: false)
+          .timeout(_defaultTimeout);
+
+      // Transform nested objects to flat structure
+      final sessions = List<Map<String, dynamic>>.from(response as List);
+      return sessions.map((session) {
+        final client = session['client'];
+        final package = session['package'];
+
+        return {
+          ...session,
+          'client_name': client != null ? client['full_name'] ?? 'Unknown' : 'Unknown',
+          'client_email': client != null ? client['email'] : null,
+          'package_name': package != null ? package['package_name'] ?? 'Package' : 'Package',
+          'remaining_sessions': package != null ? package['remaining_sessions'] : null,
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('❌ Error getting completed sessions: $e');
       rethrow;
     }
   }
